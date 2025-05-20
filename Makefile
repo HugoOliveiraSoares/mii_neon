@@ -16,3 +16,7 @@ uploadfs:
 
 monitor:
 	platformio -f -c vim device monitor --baud 115200
+
+liveserver:
+	echo "Starting live-server"
+	live-server data
