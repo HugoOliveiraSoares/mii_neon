@@ -10,7 +10,18 @@ void Effects::init() {
   FastLED.addLeds<WS2812B, 0, GRB>(leds, NUM_LEDS_STRIP1, NUM_LEDS_STRIP2)
       .setCorrection(TypicalLEDStrip);
   FastLED.setBrightness(255);
-  FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);
+  FastLED.clear();
+}
+
+unsigned long Effects::getLastUpdate() { return this->lastUpdate; }
+
+void Effects::setLastUpdate(unsigned long newUpdate) {
+  this->lastUpdate = newUpdate;
+}
+
+void Effects::setLedColor(CRGB color, int pos) {
+  this->leds[pos] = color;
+  FastLED.show();
 }
 
 void Effects::fill(CRGB color) { this->fill(color, NUM_TOTAL_LEDS); }
@@ -39,14 +50,17 @@ void Effects::fillSegment(CRGB color, Segment segment) {
 }
 
 void Effects::blink(CRGB color, CRGB color2, int time) {
-
-  this->fill(color, NUM_TOTAL_LEDS);
-
-  delay(time);
-
-  this->fill(color2, NUM_TOTAL_LEDS);
-
-  delay(time);
+  static bool isOn;
+  if (millis() - this->lastUpdate > time) {
+    if (isOn) {
+      this->fill(color2, NUM_TOTAL_LEDS);
+      isOn = false;
+    } else {
+      this->fill(color, NUM_TOTAL_LEDS);
+      isOn = true;
+    }
+    this->lastUpdate = millis();
+  }
 }
 
 void Effects::blink(CRGB color) { this->blink(color, CRGB::Black, 1000); }
@@ -140,31 +154,43 @@ void Effects::pacifica_deepen_colors() {
 }
 
 void Effects::cyclon() {
-  static uint8_t hue = 0;
-  // First slide the led in one direction
-  for (int i = 0; i < NUM_TOTAL_LEDS; i++) {
-    // Set the i'th led to red
-    leds[i] = CHSV(hue++, 255, 255);
-    // Show the leds
-    FastLED.show();
-    // now that we've shown the leds, reset the i'th led to black
-    // leds[i] = CRGB::Black;
-    fadeall();
-    // Wait a little bit before we loop around and do it again
-    delay(10);
-  }
+  unsigned long currentMillis = millis();
+  static int currentLed = 0;
+  static bool direction = true;
+  static int hue = 0;
 
-  // Now go in the other direction.
-  for (int i = (NUM_TOTAL_LEDS)-1; i >= 0; i--) {
-    // Set the i'th led to red
-    leds[i] = CHSV(hue++, 255, 255);
-    // Show the leds
-    FastLED.show();
-    // now that we've shown the leds, reset the i'th led to black
-    // leds[i] = CRGB::Black;
-    fadeall();
-    // Wait a little bit before we loop around and do it again
-    delay(10);
+  // Verifica se o tempo desde a última atualização é maior ou igual ao
+  // intervalo desejado (10ms)
+  if (currentMillis - this->lastUpdate >= 10) {
+    this->lastUpdate = currentMillis; // Atualiza o tempo da última atualização
+
+    if (direction) {
+      // Movimento da esquerda para a direita
+      leds[currentLed] = CHSV(hue++, 255, 255); // Define a cor do LED atual
+      FastLED.show();                           // Atualiza os LEDs
+      fadeall(); // Escurece todos os LEDs gradualmente
+
+      currentLed++; // Avança para o próximo LED
+
+      // Se chegou ao final, inverte a direção
+      if (currentLed >= NUM_TOTAL_LEDS) {
+        currentLed = NUM_TOTAL_LEDS - 1;
+        direction = false; // Inverte a direção
+      }
+    } else {
+      // Movimento da direita para a esquerda
+      leds[currentLed] = CHSV(hue++, 255, 255); // Define a cor do LED atual
+      FastLED.show();                           // Atualiza os LEDs
+      fadeall(); // Escurece todos os LEDs gradualmente
+
+      currentLed--; // Retrocede para o LED anterior
+
+      // Se chegou ao início, inverte a direção
+      if (currentLed < 0) {
+        currentLed = 0;
+        direction = true; // Inverte a direção
+      }
+    }
   }
 }
 
@@ -174,21 +200,28 @@ void Effects::fadeall() {
   }
 }
 
-void Effects::colorWipe(CRGB color) {
-  this->_colorWipe(color, 50);
-  this->_colorWipe(CRGB::Black, 50);
-}
+void Effects::colorWipe(CRGB color) { this->colorWipe(color, CRGB::Black, 50); }
 
 void Effects::colorWipe(CRGB color, int time) {
-  this->_colorWipe(color, time);
-  this->_colorWipe(CRGB::Black, time);
+  this->colorWipe(color, CRGB::Black, time);
 }
 
-void Effects::_colorWipe(CRGB color, int time) {
-  for (int i = 0; i < NUM_TOTAL_LEDS; i++) {
-    this->leds[i] = color;
-    FastLED.show();
-    delay(time);
+void Effects::colorWipe(CRGB color, CRGB color2, int time) {
+  static bool isColor1 = false;
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - this->lastUpdate >= time) {
+    this->lastUpdate = currentMillis;
+    if (isColor1) {
+      this->setLedColor(color, currentLed);
+    } else {
+      this->setLedColor(color2, currentLed);
+    }
+    currentLed++;
+    if (currentLed >= NUM_TOTAL_LEDS) {
+      currentLed = 0;
+      isColor1 = !isColor1;
+    }
   }
 }
 
@@ -212,15 +245,16 @@ void Effects::rainbowCycle() { this->rainbowCycle(20); }
 
 void Effects::rainbowCycle(int speedDelay) {
   uint8_t *c;
-  uint16_t i, j;
+  uint16_t j;
 
-  for (j = 0; j < 256 * 5; j++) { // 5 cycles of all colors on wheel
-    for (i = 0; i < NUM_TOTAL_LEDS; i++) {
+  if (millis() - this->lastUpdate > 20) {
+    for (int i = 0; i < NUM_TOTAL_LEDS; i++) {
       c = this->wheel(((i * 256 / NUM_TOTAL_LEDS) + j) & 255);
       this->leds[i] = CRGB(*c, *(c + 1), *(c + 2));
     }
     FastLED.show();
-    delay(speedDelay);
+    j++;
+    this->lastUpdate = millis();
   }
 }
 

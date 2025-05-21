@@ -1,13 +1,21 @@
 <!doctype html>
-<html lang="pt" data-bs-theme="dark">
+<html lang="pt" data-bs-theme="mii">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Configurações</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/style.css" />
     <link href="./css/style.css" rel="stylesheet" />
     <link rel="stylesheet" href="./libs/bootstrap.min.css" />
     <script src="./js/color-modes.js"></script>
     <script src="./libs/bootstrap.bundle.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body class="p-3 m-0 border-0 bd-example m-0 border-0">
     <!-- Nav bar -->
@@ -26,7 +34,6 @@
                   height="24px"
                   viewBox="0 -960 960 960"
                   width="24px"
-                  fill="var(--bs-primary)"
                 >
                   <path
                     d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"
@@ -64,20 +71,6 @@
           aria-selected="false"
         >
           Wi-fi
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link"
-          id="timer-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#timer"
-          type="button"
-          role="tab"
-          aria-controls="timer"
-          aria-selected="true"
-        >
-          Timer
         </button>
       </li>
       <li class="nav-item" role="presentation">
@@ -165,14 +158,6 @@
         </form>
       </div>
       <!-- END WIFI -->
-      <!-- TIMER -->
-      <div
-        class="tab-pane fade"
-        id="timer"
-        role="tabpanel"
-        aria-labelledby="timer-tab"
-      ></div>
-      <!-- END TIMER -->
       <!-- UPDATES -->
       <div
         class="tab-pane fade"

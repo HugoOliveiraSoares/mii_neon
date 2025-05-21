@@ -4,7 +4,17 @@ body {
   height: 100vh;
   padding: 25px;
   /* background-color: var(--bs-secondary-bg) !important; */
+  font-family: "Audiowide", sans-serif !important; /*https://fonts.google.com/selection/embed*/
+  font-weight: 400;
+  font-style: normal;
 }
+
+code {
+  font-family: "Audiowide", sans-serif !important; /*https://fonts.google.com/selection/embed*/
+  font-weight: 400;
+  font-style: normal;
+}
+
 .top-bar {
   position: fixed;
   top: 0;
@@ -46,12 +56,20 @@ body {
   gap: 5px;
 }
 
-#powerBtn {
+button.btn #powerBtn {
   fill: var(--bs-btn-color);
 }
 
-#configBtn {
+button.btn:hover #powerBtn {
+  fill: var(--bs-btn-hover-color);
+}
+
+a.btn #configBtn {
   fill: var(--bs-btn-color);
+}
+
+a.btn:hover #configBtn {
+  fill: var(--bs-btn-hover-color);
 }
 
 #brightInput {
@@ -60,8 +78,10 @@ body {
 }
 
 #brightInput::-webkit-slider-runnable-track {
-  background: var(--bs-dark-text-emphasis); /* Cor da linha */
-  height: 5px; /* Espessura da linha */
+  background: var(--bs-dark-text-emphasis);
+  /* Cor da linha */
+  height: 5px;
+  /* Espessura da linha */
 }
 
 /* Firefox */
@@ -71,13 +91,13 @@ body {
 }
 
 #brightInput::-webkit-slider-thumb {
-  background-color: white; /* Cor da bolinha */
-  border: 1px solid black; /* Borda da bolinha */
+  background-color: #fefefe; /* Cor da bolinha */
+  border: 1px solid #1c1a1f; /* Borda da bolinha */
 }
 
 #brightInput::-moz-range-thumb {
-  background-color: white;
-  border: 1px solid black;
+  background-color: #fefefe;
+  border: 1px solid #1c1a1f;
 }
 
 #brightInputLabel {
@@ -95,9 +115,24 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10vw;
+  gap: 5vw;
   flex-wrap: wrap;
-  margin-top: min(10vh, 80px);
+  margin-top: min(15vh, 140px);
+}
+
+#mii-neon svg {
+  width: 420px;
+  height: 594px;
+  stroke: #f0f0f0;
+  stroke-width: 0.5;
+  fill-opacity: 1;
+  fill: #18181c;
+}
+
+#color-container {
+  display: flex;
+  align-items: center;
+  gap: 5vw;
 }
 
 .tab-content.active {
@@ -117,8 +152,8 @@ body {
 
 #effects-list ul {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 colunas */
-  gap: 10px; /* Espaço entre os itens */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
 }
 
 #effects-list li {
@@ -153,7 +188,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px; /* Espaço entre o ícone e o texto */
+  gap: 8px;
+}
+
+#return-btn span svg {
+  fill: var(--bs-link-color);
 }
 
 #atencao {
@@ -167,7 +206,11 @@ body {
 
   #container {
     gap: 5vw;
-    margin-top: 15vh;
+    margin-top: 5vh;
+  }
+
+  #effects {
+    margin-top: 10vh;
   }
 
   #effects-list {
@@ -200,6 +243,10 @@ body {
 }
 
 @media (max-width: 650px) {
+  body {
+    height: 130vh;
+  }
+
   #brightInputLabel {
     display: none;
   }
@@ -211,10 +258,22 @@ body {
   }
 
   .brightness-control {
-    order: 2; /* Move o brilho para baixo */
+    order: 2;
   }
 
   .btn-group {
-    order: 1; /* Move os botões para cima */
+    order: 1;
+  }
+
+  #color-container {
+    display: flex;
+    align-items: center;
+    gap: 1vw;
+    flex-direction: column;
+  }
+
+  #mii-neon svg {
+    width: 315px;
+    height: 446px;
   }
 }

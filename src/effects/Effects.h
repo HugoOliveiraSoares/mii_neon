@@ -17,6 +17,7 @@ class Effects {
 public:
   Effects();
   void init();
+  void setLedColor(CRGB color, int pos);
   void fill(CRGB color);
   void fill(CRGB color, int length);
   void fillSegment(CRGB color, Segment segment);
@@ -25,12 +26,15 @@ public:
   void blink(CRGB color, CRGB color2);
   void pacifica_loop();
   void cyclon();
+  void colorWipe(CRGB color, CRGB color2, int time);
   void colorWipe(CRGB color, int time);
   void colorWipe(CRGB color);
   void snowSparkle(CRGB color, int sparkleDelay, int speedDelay);
   void snowSparkle(CRGB color);
   void rainbowCycle();
   void rainbowCycle(int speedDelay);
+  unsigned long getLastUpdate();
+  void setLastUpdate(unsigned long newUpdate);
 
 private:
   CRGB leds[NUM_TOTAL_LEDS];
@@ -51,6 +55,7 @@ private:
   void pacifica_add_whitecaps();
   void pacifica_deepen_colors();
   void fadeall();
-  void _colorWipe(CRGB color, int time);
   uint8_t *wheel(uint8_t wheelPos);
+  unsigned long lastUpdate = 0;
+  int currentLed = 0;
 };
