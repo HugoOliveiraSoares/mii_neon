@@ -44,11 +44,7 @@ void loop() {
     effects.fill(ledService.getCurrentColor());
     break;
   case Estatico:
-    if (ledService.getCurrentColor() != NULL) {
-      effects.fill(ledService.getCurrentColor());
-    } else {
-      effects.fill(CRGB(253, 96, 164));
-    }
+    effects.fill(ledService.getCurrentColor());
     break;
   case Blink:
     effects.blink(ledService.getCurrentColor());
