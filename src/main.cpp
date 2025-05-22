@@ -17,7 +17,7 @@ void setup() {
 
   Serial.begin(115200);
 
-  WiFi.begin("Multilaser_2.4G_39E1A8", "smart600w");
+  WiFi.begin("ssid", "password");
   Serial.println("\n🔄 Conectando ao WiFi...");
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -44,7 +44,11 @@ void loop() {
     effects.fill(ledService.getCurrentColor());
     break;
   case Estatico:
-    effects.fill(ledService.getCurrentColor());
+    if (ledService.getCurrentColor() != NULL) {
+      effects.fill(ledService.getCurrentColor());
+    } else {
+      effects.fill(CRGB(253, 96, 164));
+    }
     break;
   case Blink:
     effects.blink(ledService.getCurrentColor());
