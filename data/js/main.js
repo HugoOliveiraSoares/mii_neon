@@ -57,7 +57,7 @@ function colorPickInit() {
         b: color.blue,
       },
     };
-    if (!selectedClass) return;
+    if (!selectedClass) return; //TODO: a cor deve ser trocada mesmo que não tenha um path selecionado
 
     const paths = document.getElementsByClassName(selectedClass);
     const hex = color.hexString;
@@ -114,7 +114,7 @@ function setColor(color) {
     body: JSON.stringify(color),
   };
 
-  fetch("/setColor", options)
+  fetch("/color", options)
     .then((data) => {
       if (!data.ok) {
         throw Error(data.status);
@@ -139,7 +139,7 @@ function setBright(bright) {
     body: JSON.stringify(bright),
   };
 
-  fetch("/setBright", options)
+  fetch("/bright", options)
     .then((data) => {
       if (!data.ok) {
         throw Error(data.status);

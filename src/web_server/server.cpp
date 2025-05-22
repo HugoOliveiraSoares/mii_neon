@@ -13,7 +13,7 @@ void WebServer::begin() {
   server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
 
   server.on(
-      "/setColor", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
+      "/color", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
       [](AsyncWebServerRequest *request, uint8_t *data, size_t len,
          std::size_t index, std::size_t total) {
         StaticJsonDocument<200> doc;
@@ -41,7 +41,7 @@ void WebServer::begin() {
       });
 
   server.on(
-      "/setBright", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
+      "/bright", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
       [](AsyncWebServerRequest *request, uint8_t *data, size_t len,
          std::size_t index, std::size_t total) {
         StaticJsonDocument<200> doc;
