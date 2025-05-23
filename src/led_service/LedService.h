@@ -12,8 +12,10 @@ public:
   std::vector<String> getModes();
   EffectsEnum getCurrentEffect();
   CRGB getCurrentColor();
+  int getCurrentBright();
 
 private:
   EffectsEnum currentEffect;
   CRGB currentColor;
+  int currentBright;
 };

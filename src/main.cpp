@@ -32,6 +32,11 @@ void setup() {
   webServer.begin();
 
   effects.init();
+
+  ledService.setBright(128);
+  ledService.setColor(CRGB(253, 96, 164));
+  effects.fill(ledService.getCurrentColor());
+
   delay(100);
 }
 
@@ -44,11 +49,10 @@ void loop() {
     effects.fill(ledService.getCurrentColor());
     break;
   case Estatico:
-    if (ledService.getCurrentColor() != NULL) {
-      effects.fill(ledService.getCurrentColor());
-    } else {
-      effects.fill(CRGB(253, 96, 164));
+    if (ledService.getCurrentColor() == NULL) {
+      ledService.setColor(CRGB(253, 96, 164));
     }
+    effects.fill(ledService.getCurrentColor());
     break;
   case Blink:
     effects.blink(ledService.getCurrentColor());

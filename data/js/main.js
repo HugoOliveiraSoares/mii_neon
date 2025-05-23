@@ -1,9 +1,10 @@
 window.addEventListener("DOMContentLoaded", (event) => {
   adjustTabs();
-  colorPickInit();
-  getBright();
   fetchEffects();
+  _colorPickInit();
+  getBrightFromUI();
   setSegmentColor();
+  fetchBright();
 });
 
 let selectedClass = null;
@@ -11,7 +12,11 @@ let lastSelectedPaths = [];
 const lastStrokeMap = new Map();
 const lastStrokeWidthMap = new Map();
 
-function colorPickInit() {
+function _colorPickInit() {
+  getColor();
+}
+
+function colorPickInit(_color) {
   var _width = 0;
 
   if (window.innerHeight <= 750) {
@@ -22,7 +27,8 @@ function colorPickInit() {
 
   const colorPicker = new iro.ColorPicker("#colorPicker", {
     width: _width,
-    color: "#ffffff", // TODO: Colocar a ultima cor usada, getColor() do esp32
+    color: _color,
+    // color: "#506478",
     borderWidth: 2,
     borderColor: "var(---my-border-color)",
     layout: [
@@ -95,12 +101,13 @@ function selectEffect(effectName) {
   setEffects(_effect);
 }
 
-function getBright() {
+//TODO: brilho atual usado e definido no ui
+function getBrightFromUI() {
   document.getElementById("brightInput").addEventListener("input", function () {
     const _bright = {
       bright: this.value,
     };
-    setBright(_bright);
+    setBrightToBackend(_bright);
   });
 }
 
@@ -129,7 +136,40 @@ function setColor(color) {
     });
 }
 
-function setBright(bright) {
+function fetchColor() {
+  return fetch("/color")
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.rgb && typeof data.rgb.r !== "undefined") {
+        return data.rgb;
+      } else {
+        throw new Error("Formato de dados inválido" + JSON.stringify(data));
+      }
+    })
+    .catch((error) => {
+      console.error("Erro ao buscar cor:", error);
+      return null;
+    });
+}
+
+async function getColor() {
+  const rgb = await fetchColor();
+  if (!rgb) return null;
+
+  const r = Math.max(0, Math.min(255, rgb.r));
+  const g = Math.max(0, Math.min(255, rgb.g));
+  const b = Math.max(0, Math.min(255, rgb.b));
+
+  const componenteHex = (componente) => {
+    const hex = componente.toString(16);
+    return hex.length === 1 ? "0" + hex : hex;
+  };
+
+  const hexColor = "#" + componenteHex(r) + componenteHex(g) + componenteHex(b);
+  colorPickInit(hexColor);
+}
+
+function setBrightToBackend(bright) {
   console.log(bright);
   const options = {
     method: "POST",
@@ -152,6 +192,23 @@ function setBright(bright) {
     .catch((e) => {
       console.log(e);
     });
+}
+
+function fetchBright() {
+  fetch("/bright")
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.bright && typeof data.bright !== "undefined") {
+        setBrightToUi(data.bright);
+      } else {
+        setBrightToUi(0);
+      }
+    })
+    .catch((error) => console.error("Erro ao buscar brilho:", error));
+}
+
+function setBrightToUi(_bright) {
+  document.getElementById("brightInput").value = _bright;
 }
 
 function fetchEffects() {

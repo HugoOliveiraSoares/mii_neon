@@ -40,6 +40,30 @@ void WebServer::begin() {
                       "{\"response\":\"Color set successfully\"}");
       });
 
+  server.on("/color", HTTP_GET, [](AsyncWebServerRequest *request) {
+    // TODO: retornar a cor de cada segmento
+    CRGB currentColor = ledService.getCurrentColor();
+
+    Serial.print("Get current Color: ");
+    Serial.print("R: ");
+    Serial.print(currentColor.r);
+    Serial.print(", G: ");
+    Serial.print(currentColor.g);
+    Serial.print(", B: ");
+    Serial.println(currentColor.b);
+
+    DynamicJsonDocument doc(128);
+    JsonObject rgb = doc.createNestedObject("rgb");
+    rgb["r"] = currentColor.r;
+    rgb["g"] = currentColor.g;
+    rgb["b"] = currentColor.b;
+
+    String jsonString;
+    serializeJson(doc, jsonString);
+
+    request->send(200, "application/json", jsonString);
+  });
+
   server.on(
       "/bright", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
       [](AsyncWebServerRequest *request, uint8_t *data, size_t len,
@@ -65,6 +89,17 @@ void WebServer::begin() {
         request->send(200, "application/json",
                       "{\"response\":\"Bright set successfully\"}");
       });
+
+  server.on("/bright", HTTP_GET, [](AsyncWebServerRequest *request) {
+    int currentBright = ledService.getCurrentBright();
+
+    StaticJsonDocument<128> doc;
+    doc["bright"] = currentBright;
+
+    String response;
+    serializeJson(doc, response);
+    request->send(200, "application/json", response);
+  });
 
   server.on("/effects", HTTP_GET, [](AsyncWebServerRequest *request) {
     std::vector<String> effectsList = ledService.getModes();

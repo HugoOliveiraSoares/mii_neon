@@ -4,16 +4,13 @@ extern Effects effects;
 
 LedService::LedService() {}
 
-void LedService::setColor(CRGB color) {
-  this->currentColor = color;
-  Serial.println("Cor definido");
-}
+void LedService::setColor(CRGB color) { this->currentColor = color; }
 
 void LedService::setBright(int bright) {
 
+  this->currentBright = bright;
   FastLED.setBrightness(bright);
   FastLED.show();
-  Serial.println("Brilho definido");
 }
 
 int LedService::setMode(String effectStr) {
@@ -44,3 +41,4 @@ std::vector<String> LedService::getModes() {
 
 EffectsEnum LedService::getCurrentEffect() { return this->currentEffect; }
 CRGB LedService::getCurrentColor() { return this->currentColor; }
+int LedService::getCurrentBright() { return this->currentBright; }
