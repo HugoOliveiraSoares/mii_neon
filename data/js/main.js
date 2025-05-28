@@ -342,4 +342,35 @@ function setSegmentColor() {
       });
     }
   });
+
+  function uploadFirmware(formId, progressId) {
+    const form = document.getElementById(formId);
+    const progress = document.getElementById(progressId);
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const data = new FormData(form);
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.addEventListener("progress", function (e) {
+        if (e.lengthComputable) {
+          const percent = (e.loaded / e.total) * 100;
+          progress.value = percent;
+        }
+      });
+
+      xhr.addEventListener("load", function () {
+        alert("Upload finalizado: " + xhr.responseText);
+        progress.value = 0;
+      });
+
+      xhr.open("POST", form.action);
+      xhr.send(data);
+    });
+  }
+
+  window.onload = function () {
+    uploadFirmware("firmwareForm", "firmwareProgress");
+    uploadFirmware("fsForm", "fsProgress");
+  };
 }

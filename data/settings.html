@@ -183,7 +183,12 @@
           atualização!
         </p>
 
-        <form method="POST" action="/update" enctype="multipart/form-data">
+        <form
+          id="firmwareForm"
+          method="POST"
+          action="/update"
+          enctype="multipart/form-data"
+        >
           <div class="mb-3">
             <label for="formFile" class="form-label"
               >Selecione um arquivo</label
@@ -196,12 +201,18 @@
               required
             />
           </div>
+          <progress id="firmwareProgress" value="0" max="100"></progress><br />
           <button type="submit" class="btn btn-primary">
             Atualizar Firmware
           </button>
         </form>
 
-        <form method="POST" action="/fsupdate" enctype="multipart/form-data">
+        <form
+          id="fsForm"
+          method="POST"
+          action="/upload_tar"
+          enctype="multipart/form-data"
+        >
           <div class="mb-3">
             <label for="formFileFS" class="form-label"
               >Selecione um arquivo</label
@@ -210,10 +221,11 @@
               class="form-control"
               type="file"
               id="formFileFS"
-              name="fsupdate"
+              name="tarFile"
               required
             />
           </div>
+          <progress id="fsProgress" value="0" max="100"></progress><br />
           <button type="submit" class="btn btn-primary">
             Atualizar Filesystem
           </button>

@@ -3,7 +3,6 @@
 extern LedService ledService;
 
 WebServer::WebServer() : server(80) {}
-
 void WebServer::begin() {
   if (!LittleFS.begin()) {
     Serial.println("❌ Falha ao montar o sistema de arquivos (LittleFS)!");
@@ -192,6 +191,94 @@ void WebServer::begin() {
         }
       });
 
+  server.on(
+      "/fsupdate", HTTP_POST,
+      [this](AsyncWebServerRequest *request) {
+        if (Update.hasError()) {
+          AsyncWebServerResponse *response = request->beginResponse(
+              200, F("text/html"),
+              Update.hasError()
+                  ? String(F("Update error: ")) + Update.getErrorString()
+                  : "Update aborted by server.");
+          response->addHeader("Access-Control-Allow-Headers", "*");
+          response->addHeader("Access-Control-Allow-Origin", "*");
+          response->addHeader("Connection", "close");
+          request->send(response);
+        } else {
+          request->send_P(200, "text/html", "FS Update Success! Rebooting...");
+          scheduleRestart();
+        }
+
+        scheduleRestart();
+      },
+      [](AsyncWebServerRequest *request, String filename, size_t index,
+         uint8_t *data, size_t len, bool final) {
+        static size_t uploadSize = 0;
+
+        if (!index) {
+          Serial.printf("Iniciando atualização FS: %s\n", filename.c_str());
+          if (!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000,
+                            U_FS)) {
+            Update.printError(Serial);
+          }
+          uploadSize = 0;
+        }
+
+        if (Update.write(data, len) != len) {
+          Update.printError(Serial);
+        }
+        uploadSize += len;
+
+        if (final) {
+          if (Update.end(true)) {
+            Serial.printf("Sucesso FS: %u bytes\n", uploadSize);
+          } else {
+            Update.printError(Serial);
+          }
+        }
+      });
+
+  server.on(
+      "/upload_tar", HTTP_POST,
+      [this](AsyncWebServerRequest *request) {
+        request->send(200, "text/plain", "Arquivo TAR recebido e processado.");
+        listFiles("/");
+      },
+      [this](AsyncWebServerRequest *request, String filename, size_t index,
+             uint8_t *data, size_t len, bool final) {
+        static File tarFile;
+
+        if (index == 0) {
+          Serial.printf("Iniciando upload de %s\n", filename.c_str());
+          tarFile = LittleFS.open("/temp_upload.tar", "w");
+        }
+
+        if (tarFile) {
+          tarFile.write(data, len);
+        }
+
+        if (final) {
+          Serial.printf("Upload finalizado: %s, tamanho: %u bytes\n",
+                        filename.c_str(), index + len);
+          tarFile.close();
+
+          // Agora processa e extrai o TAR
+          File f = LittleFS.open("/temp_upload.tar", "r");
+          if (f) {
+            if (extractTar(f)) {
+              Serial.println("Extração concluída com sucesso.");
+            } else {
+              Serial.println("Erro na extração.");
+            }
+            f.close();
+            LittleFS.remove(
+                "/temp_upload.tar"); // Opcional: remove TAR após extração
+          } else {
+            Serial.println("Falha ao abrir o arquivo TAR.");
+          }
+        }
+      });
+
   server.onNotFound([](AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Resource not found");
   });
@@ -208,4 +295,87 @@ void WebServer::scheduleRestart() {
     Serial.println("Reiniciando...");
     ESP.restart();
   });
+}
+
+bool WebServer::extractTar(File &tarFile) {
+  const size_t BLOCK_SIZE = 512;
+  uint8_t header[BLOCK_SIZE];
+
+  Serial.printf("Tamanho do tar: %u bytes\n", tarFile.size());
+
+  while (tarFile.position() < tarFile.size()) {
+    if (tarFile.read(header, BLOCK_SIZE) != BLOCK_SIZE) {
+      Serial.println("Erro ao ler cabeçalho TAR.");
+      return false;
+    }
+
+    if (header[0] == '\0') {
+      Serial.println("Fim do arquivo TAR detectado.");
+      break;
+    }
+
+    // Nome do arquivo
+    char name[101] = {0};
+    memcpy(name, header, 100);
+
+    // Tamanho do arquivo (em octal)
+    char sizeStr[13] = {0};
+    memcpy(sizeStr, header + 124, 12);
+    unsigned long fileSize = strtoul(sizeStr, NULL, 8);
+
+    Serial.printf("Extraindo: %s (%lu bytes)\n", name, fileSize);
+
+    // Ignora diretórios
+    if (name[strlen(name) - 1] == '/') {
+      continue;
+    }
+
+    // Garante que diretórios existam
+    String filePath = "/" + String(name);
+    int lastSlash = filePath.lastIndexOf('/');
+    if (lastSlash != -1) {
+      String dirPath = filePath.substring(0, lastSlash);
+      if (!LittleFS.exists(dirPath)) {
+        LittleFS.mkdir(dirPath);
+        Serial.printf("Criado diretório: %s\n", dirPath.c_str());
+      }
+    }
+
+    File outFile = LittleFS.open(filePath, "w");
+    if (!outFile) {
+      Serial.printf("Erro ao criar arquivo: %s\n", filePath.c_str());
+      return false;
+    }
+
+    unsigned long remaining = fileSize;
+    uint8_t buf[BLOCK_SIZE];
+
+    while (remaining > 0) {
+      size_t toRead = remaining > BLOCK_SIZE ? BLOCK_SIZE : remaining;
+      if (tarFile.read(buf, toRead) != toRead) {
+        Serial.println("Erro de leitura durante extração.");
+        outFile.close();
+        return false;
+      }
+      outFile.write(buf, toRead);
+      remaining -= toRead;
+    }
+    outFile.close();
+
+    // Pula o padding
+    size_t padding = (BLOCK_SIZE - (fileSize % BLOCK_SIZE)) % BLOCK_SIZE;
+    if (padding) {
+      tarFile.seek(padding, SeekCur);
+    }
+  }
+  Serial.println("Extração concluída com sucesso.");
+  return true;
+}
+
+void WebServer::listFiles(const char *dirPath) {
+  Dir dir = LittleFS.openDir(dirPath);
+  while (dir.next()) {
+    Serial.printf("Arquivo: %s (%d bytes)\n", dir.fileName().c_str(),
+                  dir.fileSize());
+  }
 }

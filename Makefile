@@ -17,6 +17,10 @@ uploadfs:
 monitor:
 	platformio -f -c vim device monitor --baud 115200
 
+
+create_tar:
+	tar -cf update.tar -C data js css index.html settings.html
+
 liveserver:
 	echo "Starting live-server"
 	live-server data
