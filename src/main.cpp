@@ -3,6 +3,7 @@
 #include "effects/EffectsEnum.h"
 #include "led_service/LedService.h"
 #include "web_server/server.h"
+#include <Arduino.h>
 #include <cstdlib>
 
 WebServer webServer;
@@ -17,7 +18,7 @@ void setup() {
 
   Serial.begin(115200);
 
-  WiFi.begin("ssid", "password");
+  WiFi.begin("Multilaser_2.4G_39E1A8", "smart600w");
   Serial.println("\n🔄 Conectando ao WiFi...");
 
   while (WiFi.status() != WL_CONNECTED) {

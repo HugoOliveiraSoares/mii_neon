@@ -183,14 +183,27 @@
           atualização!
         </p>
 
-        <form>
+        <form method="POST" action="/update" enctype="multipart/form-data">
           <div class="mb-3">
             <label for="formFile" class="form-label"
               >Selecione um arquivo</label
             >
             <input class="form-control" type="file" id="formFile" required />
           </div>
-          <button type="submit" class="btn btn-primary">Atualizar</button>
+          <button type="submit" class="btn btn-primary">
+            Atualizar Firmware
+          </button>
+        </form>
+        <form method="POST" action="/fsupdate" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="formFile" class="form-label"
+              >Selecione um arquivo</label
+            >
+            <input class="form-control" type="file" id="formFile" required />
+          </div>
+          <button type="submit" class="btn btn-primary">
+            Atualizar Filesystem
+          </button>
         </form>
       </div>
       <!-- END UPDATES -->

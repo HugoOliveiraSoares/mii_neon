@@ -147,10 +147,45 @@ void WebServer::begin() {
                       "{\"response\":\"Effect set successfully\"}");
       });
 
-  server.begin();
+  server.on(
+      "/update", HTTP_POST,
+      [this](AsyncWebServerRequest *request) {
+        String updateType = "firmware";
+        if (request->hasParam("type", true)) {
+          updateType = request->getParam("type", true)->value();
+        }
+        request->send(200, "text/plain", "Atualização concluida.");
+      },
+      [this](AsyncWebServerRequest *request, String filename, size_t index,
+             uint8_t *data, size_t len, bool final) {
+        static File uploadFile;
+
+        if (!index) {
+          Serial.printf("Upload iniciado: %s\n", filename.c_str());
+          uploadFile = LittleFS.open("/firmware.bin", "w");
+        }
+
+        if (uploadFile) {
+          uploadFile.write(data, len);
+        }
+
+        if (final) {
+          Serial.printf("Upload concluído: %s, tamanho: %u bytes\n",
+                        filename.c_str(), index + len);
+          if (uploadFile) {
+            uploadFile.close();
+          }
+          yield();
+          updateService.handleWithUpdate("/firmware.bin", "firmware");
+        }
+      });
 
   server.onNotFound([](AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Resource not found");
+  });
+
+  server.on("/hello", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "application/json", "{\"response\":\"AGORA FUNCIONA\"}");
   });
 
   server.begin();
