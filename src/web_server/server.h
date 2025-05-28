@@ -1,10 +1,10 @@
 #pragma once
 
 #include "../led_service/LedService.h"
-#include "../update/update.h"
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
+#include <Ticker.h>
 #include <vector>
 
 class WebServer {
@@ -14,5 +14,6 @@ public:
 
 private:
   AsyncWebServer server;
-  UpdateService updateService;
+  Ticker restartTicker;
+  void scheduleRestart();
 };

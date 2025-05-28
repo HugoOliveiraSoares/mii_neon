@@ -150,33 +150,45 @@ void WebServer::begin() {
   server.on(
       "/update", HTTP_POST,
       [this](AsyncWebServerRequest *request) {
-        String updateType = "firmware";
-        if (request->hasParam("type", true)) {
-          updateType = request->getParam("type", true)->value();
+        if (Update.hasError()) {
+          AsyncWebServerResponse *response = request->beginResponse(
+              200, F("text/html"),
+              Update.hasError()
+                  ? String(F("Update error: ")) + Update.getErrorString()
+                  : "Update aborted by server.");
+          response->addHeader("Access-Control-Allow-Headers", "*");
+          response->addHeader("Access-Control-Allow-Origin", "*");
+          response->addHeader("Connection", "close");
+          request->send(response);
+        } else {
+          request->send_P(200, PSTR("text/html"),
+                          "Update Success! Rebooting...");
+          scheduleRestart();
         }
-        request->send(200, "text/plain", "Atualização concluida.");
       },
-      [this](AsyncWebServerRequest *request, String filename, size_t index,
-             uint8_t *data, size_t len, bool final) {
-        static File uploadFile;
+      [](AsyncWebServerRequest *request, String filename, size_t index,
+         uint8_t *data, size_t len, bool final) {
+        static size_t uploadSize = 0;
 
         if (!index) {
-          Serial.printf("Upload iniciado: %s\n", filename.c_str());
-          uploadFile = LittleFS.open("/firmware.bin", "w");
+          Serial.printf("Iniciando atualização: %s\n", filename.c_str());
+          if (!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000)) {
+            Update.printError(Serial);
+          }
+          uploadSize = 0;
         }
 
-        if (uploadFile) {
-          uploadFile.write(data, len);
+        if (Update.write(data, len) != len) {
+          Update.printError(Serial);
         }
+        uploadSize += len;
 
         if (final) {
-          Serial.printf("Upload concluído: %s, tamanho: %u bytes\n",
-                        filename.c_str(), index + len);
-          if (uploadFile) {
-            uploadFile.close();
+          if (Update.end(true)) {
+            Serial.printf("Sucesso: %u bytes\n", uploadSize);
+          } else {
+            Update.printError(Serial);
           }
-          yield();
-          updateService.handleWithUpdate("/firmware.bin", "firmware");
         }
       });
 
@@ -185,8 +197,16 @@ void WebServer::begin() {
   });
 
   server.on("/hello", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "application/json", "{\"response\":\"AGORA FUNCIONA\"}");
+    request->send(200, "application/json",
+                  "{\"response\":\"Funfa no curl e na web?\"}");
   });
 
   server.begin();
+}
+
+void WebServer::scheduleRestart() {
+  this->restartTicker.once_ms(1000, [] {
+    Serial.println("Reiniciando...");
+    ESP.restart();
+  });
 }
