@@ -197,8 +197,7 @@ void WebServer::begin() {
   });
 
   server.on("/hello", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "application/json",
-                  "{\"response\":\"Funfa no curl e na web?\"}");
+    request->send(200, "application/json", "{\"response\":\"Agora vai\"}");
   });
 
   server.begin();
