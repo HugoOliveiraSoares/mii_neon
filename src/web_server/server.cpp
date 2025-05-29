@@ -194,53 +194,6 @@ void WebServer::begin() {
   server.on(
       "/fsupdate", HTTP_POST,
       [this](AsyncWebServerRequest *request) {
-        if (Update.hasError()) {
-          AsyncWebServerResponse *response = request->beginResponse(
-              200, F("text/html"),
-              Update.hasError()
-                  ? String(F("Update error: ")) + Update.getErrorString()
-                  : "Update aborted by server.");
-          response->addHeader("Access-Control-Allow-Headers", "*");
-          response->addHeader("Access-Control-Allow-Origin", "*");
-          response->addHeader("Connection", "close");
-          request->send(response);
-        } else {
-          request->send_P(200, "text/html", "FS Update Success! Rebooting...");
-          scheduleRestart();
-        }
-
-        scheduleRestart();
-      },
-      [](AsyncWebServerRequest *request, String filename, size_t index,
-         uint8_t *data, size_t len, bool final) {
-        static size_t uploadSize = 0;
-
-        if (!index) {
-          Serial.printf("Iniciando atualização FS: %s\n", filename.c_str());
-          if (!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000,
-                            U_FS)) {
-            Update.printError(Serial);
-          }
-          uploadSize = 0;
-        }
-
-        if (Update.write(data, len) != len) {
-          Update.printError(Serial);
-        }
-        uploadSize += len;
-
-        if (final) {
-          if (Update.end(true)) {
-            Serial.printf("Sucesso FS: %u bytes\n", uploadSize);
-          } else {
-            Update.printError(Serial);
-          }
-        }
-      });
-
-  server.on(
-      "/upload_tar", HTTP_POST,
-      [this](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", "Arquivo TAR recebido e processado.");
         listFiles("/");
       },
@@ -262,7 +215,6 @@ void WebServer::begin() {
                         filename.c_str(), index + len);
           tarFile.close();
 
-          // Agora processa e extrai o TAR
           File f = LittleFS.open("/temp_upload.tar", "r");
           if (f) {
             if (extractTar(f)) {
@@ -271,8 +223,7 @@ void WebServer::begin() {
               Serial.println("Erro na extração.");
             }
             f.close();
-            LittleFS.remove(
-                "/temp_upload.tar"); // Opcional: remove TAR após extração
+            LittleFS.remove("/temp_upload.tar");
           } else {
             Serial.println("Falha ao abrir o arquivo TAR.");
           }
@@ -281,10 +232,6 @@ void WebServer::begin() {
 
   server.onNotFound([](AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Resource not found");
-  });
-
-  server.on("/hello", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "application/json", "{\"response\":\"Agora vai\"}");
   });
 
   server.begin();
