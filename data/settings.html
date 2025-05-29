@@ -165,22 +165,44 @@
         role="tabpanel"
         aria-labelledby="updates-tab"
       >
-        <h2>Atualização de Firmware</h2>
+        <h2>Atualizações</h2>
+
         <p>
-          Atualize o firmware do seu dispositivo para melhorar o desempenho e
-          adicionar novos recursos.
+          As atualizações não serão frequentes, mas sempre que achar um bug ou
+          quiser uma nova função, é só me avisar! Veja em "Sobre" como falar
+          comigo.
         </p>
 
-        <p><strong>Passos para atualizar:</strong></p>
+        <p>
+          <strong>O que é o firmware?</strong><br />
+          - É o "sistema" que faz o dispositivo funcionar.
+        </p>
+
+        <p>
+          <strong>O que é o filesystem?</strong><br />
+          - São os "arquivos" que o dispositivo usa, como páginas ou
+          configurações.
+        </p>
+
+        <p><strong>Como atualizar:</strong></p>
+
+        <p><strong>1. Atualizar o sistema (firmware)</strong></p>
         <ol>
-          <li>Escolha um arquivo <code>.bin</code>.</li>
-          <li>Clique no botão de atualização.</li>
-          <li>Aguarde a reinicialização do dispositivo.</li>
+          <li>Selecione o arquivo <code>.bin</code>.</li>
+          <li>Clique no botão <strong>Atualizar</strong>.</li>
+          <li>Espere o dispositivo reiniciar sozinho.</li>
+        </ol>
+
+        <p><strong>2. Atualizar os arquivos (filesystem)</strong></p>
+        <ol>
+          <li>Selecione o arquivo <code>.tar</code>.</li>
+          <li>Clique no botão <strong>Atualizar</strong>.</li>
+          <li>Espere até aparecer a mensagem de confirmação.</li>
         </ol>
 
         <p id="atencao">
-          <strong>Atenção:</strong> Não desligue o dispositivo durante a
-          atualização!
+          <strong>Importante:</strong> Não desligue o dispositivo enquanto ele
+          estiver atualizando!
         </p>
 
         <form
@@ -190,9 +212,7 @@
           enctype="multipart/form-data"
         >
           <div class="mb-3">
-            <label for="formFile" class="form-label"
-              >Selecione um arquivo</label
-            >
+            <label for="formFile" class="form-label">Atualize o firmware</label>
             <input
               class="form-control"
               type="file"
@@ -201,34 +221,28 @@
               required
             />
           </div>
-          <progress id="firmwareProgress" value="0" max="100"></progress><br />
-          <button type="submit" class="btn btn-primary">
-            Atualizar Firmware
-          </button>
+          <button type="submit" class="btn btn-primary">Atualizar</button>
         </form>
 
         <form
           id="fsForm"
           method="POST"
-          action="/upload_tar"
+          action="/fsupdate"
           enctype="multipart/form-data"
         >
           <div class="mb-3">
             <label for="formFileFS" class="form-label"
-              >Selecione um arquivo</label
+              >Atualize o filesystem</label
             >
             <input
               class="form-control"
               type="file"
               id="formFileFS"
-              name="tarFile"
+              name="fsupdate"
               required
             />
           </div>
-          <progress id="fsProgress" value="0" max="100"></progress><br />
-          <button type="submit" class="btn btn-primary">
-            Atualizar Filesystem
-          </button>
+          <button type="submit" class="btn btn-primary">Atualizar</button>
         </form>
       </div>
       <!-- END UPDATES -->
