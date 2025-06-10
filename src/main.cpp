@@ -3,6 +3,7 @@
 #include "effects/EffectsEnum.h"
 #include "led_service/LedService.h"
 #include "web_server/server.h"
+#include <Arduino.h>
 #include <cstdlib>
 
 WebServer webServer;
