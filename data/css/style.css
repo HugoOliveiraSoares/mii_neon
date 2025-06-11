@@ -72,6 +72,10 @@ a.btn:hover #configBtn {
   fill: var(--bs-btn-hover-color);
 }
 
+.contacts {
+  text-decoration: none;
+}
+
 #brightInput {
   accent-color: var(--bs-dark-text-emphasis);
   width: 225px;
