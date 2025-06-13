@@ -4,6 +4,7 @@
 #include "led_service/LedService.h"
 #include "web_server/server.h"
 #include <Arduino.h>
+#include <ESP8266mDNS.h>
 #include <cstdlib>
 
 WebServer webServer;
@@ -30,7 +31,16 @@ void setup() {
   Serial.print("📡 IP: ");
   Serial.println(WiFi.localIP());
 
+  if (!MDNS.begin("mii-neon")) {
+    Serial.println("Error setting up MDNS responder!");
+    while (1) {
+      delay(1000);
+    }
+  }
+  Serial.println("mDNS responder started");
+
   webServer.begin();
+  MDNS.addService("http", "tcp", 80);
 
   effects.init();
 
@@ -42,6 +52,7 @@ void setup() {
 }
 
 void loop() {
+  MDNS.update();
 
   delay(0);
 
