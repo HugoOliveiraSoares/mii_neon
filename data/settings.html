@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/style.css" />
     <link href="./css/style.css" rel="stylesheet" />
     <link rel="stylesheet" href="./libs/bootstrap.min.css" />
+    <script src="./js/main.js"></script>
     <script src="./js/color-modes.js"></script>
     <script src="./libs/bootstrap.bundle.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -137,23 +138,27 @@
       >
         <h2>Configurar Wi-Fi</h2>
         <p>
-          Insira as credenciais da rede Wi-Fi à qual você deseja que seu
-          dispositivo se conecte.
+          Selecione a rede Wi-Fi e insira a senha para conectar seu dispositivo.
         </p>
-        <form>
+        <form id="wifiForm" onsubmit="saveWifi(event)">
           <div class="mb-3">
-            <label for="wifi-name" class="form-label">Wi-fi</label>
-            <input type="text" class="form-control" id="wifi-name" required />
+            <label for="ssid" class="form-label">Wi-Fi</label>
+            <div class="input-group">
+              <select class="form-select" id="ssid" required></select>
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                onclick="scanWifi()"
+              >
+                Atualizar lista
+              </button>
+            </div>
           </div>
           <div class="mb-3">
-            <label for="wifi-password" class="form-label">Senha</label>
-            <input
-              type="password"
-              class="form-control"
-              id="wifi-password"
-              required
-            />
+            <label for="pass" class="form-label">Senha</label>
+            <input type="password" class="form-control" id="pass" required />
           </div>
+          <div id="wifi-msg" class="mb-2"></div>
           <button type="submit" class="btn btn-primary">Conectar</button>
         </form>
       </div>

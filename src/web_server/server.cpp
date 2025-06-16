@@ -4,10 +4,6 @@ extern LedService ledService;
 
 WebServer::WebServer() : server(80) {}
 void WebServer::begin() {
-  if (!LittleFS.begin()) {
-    Serial.println("❌ Falha ao montar o sistema de arquivos (LittleFS)!");
-    return;
-  }
 
   server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
 
@@ -230,6 +226,22 @@ void WebServer::begin() {
         }
       });
 
+  server.on("/savewifi", HTTP_POST, [this](AsyncWebServerRequest *request) {
+    if (request->hasParam("ssid", true) && request->hasParam("pass", true)) {
+      String ssid = request->getParam("ssid", true)->value();
+      String pass = request->getParam("pass", true)->value();
+      saveWiFiConfig(ssid, pass);
+      request->send(200, "text/plain", "OK");
+      ESP.restart();
+    } else {
+      request->send(400, "text/plain", "Parâmetros inválidos");
+    }
+  });
+
+  server.on("/scan", HTTP_GET, [this](AsyncWebServerRequest *request) {
+    request->send(200, "application/json", lastScanJson);
+  });
+
   server.onNotFound([](AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Resource not found");
   });
@@ -325,4 +337,47 @@ void WebServer::listFiles(const char *dirPath) {
     Serial.printf("Arquivo: %s (%d bytes)\n", dir.fileName().c_str(),
                   dir.fileSize());
   }
+}
+
+void WebServer::scanNetworks() {
+  Serial.println("Iniciando scan");
+  this->lastScanJson = "";
+  int n = WiFi.scanComplete();
+  if (n == WIFI_SCAN_RUNNING)
+    return; // já está escaneando
+  if (n >= 0) {
+    DynamicJsonDocument doc(1024);
+    JsonArray arr = doc.createNestedArray("networks");
+    for (int i = 0; i < n; ++i) {
+      Serial.println(WiFi.SSID(i));
+      arr.add(WiFi.SSID(i));
+    }
+    WiFi.scanDelete();
+    serializeJson(doc, this->lastScanJson);
+  }
+  WiFi.scanNetworks(true); // inicia scan assíncrono
+  Serial.println("Finalizando scan");
+}
+
+void WebServer::saveWiFiConfig(const String &ssid, const String &pass) {
+  DynamicJsonDocument doc(256);
+  doc["ssid"] = ssid;
+  doc["pass"] = pass;
+  File f = LittleFS.open("/wifi.json", "w");
+  serializeJson(doc, f);
+  f.close();
+}
+
+bool WebServer::loadWiFiConfig(String &ssid, String &pass) {
+  if (!LittleFS.exists("/wifi.json"))
+    return false;
+  File f = LittleFS.open("/wifi.json", "r");
+  DynamicJsonDocument doc(256);
+  DeserializationError err = deserializeJson(doc, f);
+  f.close();
+  if (err)
+    return false;
+  ssid = doc["ssid"].as<String>();
+  pass = doc["pass"].as<String>();
+  return true;
 }

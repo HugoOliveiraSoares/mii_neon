@@ -5,7 +5,11 @@ window.addEventListener("DOMContentLoaded", (event) => {
   getBrightFromUI();
   setSegmentColor();
   fetchBright();
+  // Carrega redes ao abrir a aba
+  scanWifi();
 });
+
+document.getElementById("wifi-tab").addEventListener("shown.bs.tab", scanWifi);
 
 let selectedClass = null;
 let lastSelectedPaths = [];
@@ -342,4 +346,50 @@ function setSegmentColor() {
       });
     }
   });
+}
+
+async function scanWifi() {
+  const select = document.getElementById("ssid");
+  select.innerHTML = "<option>Carregando...</option>";
+  try {
+    const res = await fetch("/scan");
+    const data = await res.json();
+    select.innerHTML = "";
+    if (Array.isArray(data.networks)) {
+      data.networks.forEach((ssid) => {
+        const opt = document.createElement("option");
+        opt.value = ssid;
+        opt.textContent = ssid;
+        select.appendChild(opt);
+      });
+      if (data.networks.length === 0) {
+        select.innerHTML = "<option>Nenhuma rede encontrada</option>";
+      }
+    } else {
+      select.innerHTML = "<option>Formato de dados inválido</option>";
+    }
+  } catch (e) {
+    select.innerHTML = "<option>Erro ao buscar redes</option>";
+  }
+}
+
+async function saveWifi(e) {
+  e.preventDefault();
+  const ssid = document.getElementById("ssid").value;
+  const pass = document.getElementById("pass").value;
+  const msg = document.getElementById("wifi-msg");
+  msg.textContent = "Conectando...";
+  const form = new FormData();
+  form.append("ssid", ssid);
+  form.append("pass", pass);
+  try {
+    const res = await fetch("/savewifi", { method: "POST", body: form });
+    if (res.ok) {
+      msg.textContent = "Salvo! Reiniciando...";
+    } else {
+      msg.textContent = "Erro ao salvar Wi-Fi";
+    }
+  } catch (e) {
+    msg.textContent = "Erro de comunicação";
+  }
 }
