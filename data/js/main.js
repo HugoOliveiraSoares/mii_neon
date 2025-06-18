@@ -354,8 +354,8 @@ async function scanWifi() {
   try {
     const res = await fetch("/scan");
     const data = await res.json();
-    select.innerHTML = "";
-    if (Array.isArray(data.networks)) {
+    if (data.networks) {
+      select.innerHTML = "";
       data.networks.forEach((ssid) => {
         const opt = document.createElement("option");
         opt.value = ssid;
@@ -365,6 +365,9 @@ async function scanWifi() {
       if (data.networks.length === 0) {
         select.innerHTML = "<option>Nenhuma rede encontrada</option>";
       }
+    } else if (data.status === "scanning" || data.status === "started") {
+      // Scan ainda em andamento, tente novamente em 1 segundo
+      setTimeout(scanWifi, 1000);
     } else {
       select.innerHTML = "<option>Formato de dados inválido</option>";
     }

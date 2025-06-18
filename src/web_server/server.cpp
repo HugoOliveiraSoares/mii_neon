@@ -239,7 +239,26 @@ void WebServer::begin() {
   });
 
   server.on("/scan", HTTP_GET, [this](AsyncWebServerRequest *request) {
-    request->send(200, "application/json", lastScanJson);
+    int n = WiFi.scanComplete();
+    if (n == WIFI_SCAN_RUNNING) {
+      request->send(200, "application/json", "{\"status\":\"scanning\"}");
+      return;
+    }
+    if (n >= 0) {
+      DynamicJsonDocument doc(1024);
+      JsonArray arr = doc.createNestedArray("networks");
+      for (int i = 0; i < n; ++i) {
+        arr.add(WiFi.SSID(i));
+      }
+      WiFi.scanDelete();
+      String json;
+      serializeJson(doc, json);
+      request->send(200, "application/json", json);
+      return;
+    }
+
+    WiFi.scanNetworks(true);
+    request->send(200, "application/json", "{\"status\":\"started\"}");
   });
 
   server.onNotFound([](AsyncWebServerRequest *request) {
@@ -337,26 +356,6 @@ void WebServer::listFiles(const char *dirPath) {
     Serial.printf("Arquivo: %s (%d bytes)\n", dir.fileName().c_str(),
                   dir.fileSize());
   }
-}
-
-void WebServer::scanNetworks() {
-  Serial.println("Iniciando scan");
-  this->lastScanJson = "";
-  int n = WiFi.scanComplete();
-  if (n == WIFI_SCAN_RUNNING)
-    return; // já está escaneando
-  if (n >= 0) {
-    DynamicJsonDocument doc(1024);
-    JsonArray arr = doc.createNestedArray("networks");
-    for (int i = 0; i < n; ++i) {
-      Serial.println(WiFi.SSID(i));
-      arr.add(WiFi.SSID(i));
-    }
-    WiFi.scanDelete();
-    serializeJson(doc, this->lastScanJson);
-  }
-  WiFi.scanNetworks(true); // inicia scan assíncrono
-  Serial.println("Finalizando scan");
 }
 
 void WebServer::saveWiFiConfig(const String &ssid, const String &pass) {

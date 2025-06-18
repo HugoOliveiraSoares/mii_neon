@@ -8,8 +8,8 @@
 #include <cstdlib>
 
 #define WIFI_CONFIG_FILE "/wifi.json"
-#define AP_SSID "MiiNeon"
-#define AP_PASS "gatosgordosrebeldes"
+#define AP_SSID ""
+#define AP_PASS ""
 
 WebServer webServer;
 
@@ -99,11 +99,6 @@ void setup() {
 
 void loop() {
   MDNS.update();
-
-  if (millis() - lastScanTime > scanInterval) {
-    webServer.scanNetworks();
-    lastScanTime = millis();
-  }
 
   delay(0);
 
