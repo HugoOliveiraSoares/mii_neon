@@ -56,8 +56,10 @@ void setup() {
     }
     if (WiFi.status() == WL_CONNECTED) {
       Serial.println("\nWiFi conectado!");
+      WebServer::wifiStatus = "success";
       Serial.println(WiFi.localIP());
     } else {
+      WebServer::wifiStatus = "fail";
       Serial.println("\nErro: Não foi possível conectar na rede salva.");
       startAP();
     }

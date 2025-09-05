@@ -2,6 +2,8 @@
 
 extern LedService ledService;
 
+String WebServer::wifiStatus = "idle";
+
 WebServer::WebServer() : server(80) {}
 void WebServer::begin() {
 
@@ -231,10 +233,12 @@ void WebServer::begin() {
       String ssid = request->getParam("ssid", true)->value();
       String pass = request->getParam("pass", true)->value();
       saveWiFiConfig(ssid, pass);
-      request->send(200, "text/plain", "OK");
-      ESP.restart();
+      request->send_P(200, PSTR("application/json"),
+                      "{\"status\":\"Credentials saved! Rebooting...\"}");
+      scheduleRestart();
     } else {
-      request->send(400, "text/plain", "Parâmetros inválidos");
+      request->send(400, PSTR("application/json"),
+                    "{\"status\":\"Parâmetros inválidos\"}");
     }
   });
 
@@ -261,8 +265,18 @@ void WebServer::begin() {
     request->send(200, "application/json", "{\"status\":\"started\"}");
   });
 
+  server.on("/wifistatus", HTTP_GET, [](AsyncWebServerRequest *request) {
+    DynamicJsonDocument doc(128);
+    doc["status"] = wifiStatus;
+    if (wifiStatus == "success")
+      doc["ip"] = WiFi.localIP().toString();
+    String json;
+    serializeJson(doc, json);
+    request->send(200, "application/json", json);
+  });
+
   server.onNotFound([](AsyncWebServerRequest *request) {
-    request->send(404, "text/plain", "Resource not found");
+    request->send(404, "application/json", "{\"msg\":\"Resource not found\"}");
   });
 
   server.begin();
@@ -359,12 +373,14 @@ void WebServer::listFiles(const char *dirPath) {
 }
 
 void WebServer::saveWiFiConfig(const String &ssid, const String &pass) {
+  Serial.println("Salvando credenciais do wifi");
   DynamicJsonDocument doc(256);
   doc["ssid"] = ssid;
   doc["pass"] = pass;
   File f = LittleFS.open("/wifi.json", "w");
   serializeJson(doc, f);
   f.close();
+  Serial.println("Credenciais salvas!");
 }
 
 bool WebServer::loadWiFiConfig(String &ssid, String &pass) {

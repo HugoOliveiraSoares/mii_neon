@@ -14,6 +14,7 @@ public:
   void saveWiFiConfig(const String &ssid, const String &pass);
   bool loadWiFiConfig(String &ssid, String &pass);
   String lastScanJson = "";
+  static String wifiStatus;
 
 private:
   AsyncWebServer server;
