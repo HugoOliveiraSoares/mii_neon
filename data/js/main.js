@@ -381,18 +381,100 @@ async function saveWifi(e) {
   const ssid = document.getElementById("ssid").value;
   const pass = document.getElementById("pass").value;
   const msg = document.getElementById("wifi-msg");
+
+  if (!ssid || !pass) {
+    msg.textContent = "SSID e senha são obrigatórios.";
+    return;
+  }
+
   msg.textContent = "Conectando...";
+
   const form = new FormData();
   form.append("ssid", ssid);
   form.append("pass", pass);
+
   try {
     const res = await fetch("/savewifi", { method: "POST", body: form });
-    if (res.ok) {
-      msg.textContent = "Salvo! Reiniciando...";
-    } else {
-      msg.textContent = "Erro ao salvar Wi-Fi";
+    const data = await res.json();
+
+    console.log("Status code: " + data.status);
+
+    if (data.status === "error") {
+      const mensagem = "Erro ao salvar Wi-Fi. " + data.msg;
+      console.log(mensagem);
+      showModal("wifiFailModal", data.msg);
+      return;
     }
+
+    // Polling para status
+    let tentativas = 0;
+    const maxTentativas = 20;
+    const intervalo = 10000; // ms
+
+    const poll = setInterval(async () => {
+      tentativas++;
+      try {
+        const statusRes = await fetch("/wifistatus");
+        const statusData = await statusRes.json();
+        console.log("Status retornado: " + statusData.status);
+        console.log("Tentativa: " + tentativas);
+        if (statusData.status === "success") {
+          msg.textContent = "Conectado! Redirecionando...";
+          console.log("Conectado! Redirecionando...");
+          clearInterval(poll);
+          setTimeout(() => (window.location.href = "/"), 2000);
+        } else if (statusData.status === "fail") {
+          showModal(
+            "wifiFailModal",
+            "Falha ao conectar. Verifique SSID/senha.",
+          );
+          console.log("Falha ao conectar. Verifique SSID/senha.");
+          clearInterval(poll);
+        } else if (tentativas >= maxTentativas) {
+          console.log("Tempo excedido ao conectar.");
+          showModal("wifiFailModal", "Tempo excedido ao conectar.");
+          clearInterval(poll);
+        }
+        // Se status for "connecting" ou "idle", continua polling
+      } catch (err) {
+        if (err instanceof TypeError) {
+          tentativas++;
+          console.warn("TypeError capturado, tentando novamente...");
+          if (tentativas >= maxTentativas) {
+            clearInterval(poll);
+            showModal("wifiFailModal", "");
+          }
+          return;
+        } else {
+          showModal("wifiFailModal", "Erro de comunicação com o dispositivo.");
+          clearInterval(poll);
+        }
+      }
+    }, intervalo);
   } catch (e) {
+    showModal("wifiFailModal");
     msg.textContent = "Erro de comunicação";
+    console.log(e);
   }
+}
+
+function togglePassword() {
+  const passInput = document.getElementById("pass");
+
+  if (passInput.type === "password") {
+    passInput.type = "text";
+  } else {
+    passInput.type = "password";
+  }
+}
+
+function showModal(modalId, msg) {
+  const modalContainer = document.getElementById("modalContainer");
+  const modalContent = modalContainer.querySelector(`#${modalId}`);
+
+  const msgM = document.getElementById("msg-modal");
+  msgM.textContent = msg;
+
+  const minhaModal = new bootstrap.Modal(modalContent);
+  minhaModal.show();
 }

@@ -156,7 +156,16 @@
           </div>
           <div class="mb-3">
             <label for="pass" class="form-label">Senha</label>
-            <input type="password" class="form-control" id="pass" required />
+            <div class="input-group">
+              <input type="password" class="form-control" id="pass" required />
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                onclick="togglePassword()"
+              >
+                👁
+              </button>
+            </div>
           </div>
           <div id="wifi-msg" class="mb-2"></div>
           <button type="submit" class="btn btn-primary">Conectar</button>
@@ -312,5 +321,69 @@
       <!-- END SUPORT INFO -->
     </div>
     <!-- END Container -->
+    <div id="modalContainer">
+      <div
+        class="modal fade"
+        id="wifiFailModal"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+              <h5 class="modal-title">Falha ao se conectar no dispositivo</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body">
+              Não foi possível conectar ao dispositivo.<br />
+              Verifique o led na parte traseira, se estiver vermelho o
+              dispositivo não conseguir se conectar a sua rede wifi. Verifique
+              SSID e senha e tente novamente.
+              <br />
+              Se o led estiver verde o dispositivo se conectou a rede wifi,
+              conect-se na mesma rede e acesse:
+              <code>http://mii-neon.local</code> ou pelo IP que ele recebeu.
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" data-bs-dismiss="modal">
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="modal fade"
+        id="wifiFailModal"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+              <h5 class="modal-title">Falha ao configurar wifi</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body">
+              Erro ao salvar Wifi-Fi
+              <div id="msg-modal" class="mb-2"></div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" data-bs-dismiss="modal">
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
