@@ -95,7 +95,6 @@ function selectEffect(effectName) {
   setEffects(_effect);
 }
 
-//TODO: brilho atual usado e definido no ui
 function getBrightFromUI() {
   document.getElementById("brightInput").addEventListener("input", function () {
     const _bright = {

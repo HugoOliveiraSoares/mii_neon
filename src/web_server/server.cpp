@@ -38,7 +38,6 @@ void WebServer::begin() {
       });
 
   server.on("/color", HTTP_GET, [](AsyncWebServerRequest *request) {
-    // TODO: retornar a cor de cada segmento
     CRGB currentColor = ledService.getCurrentColor();
 
     Serial.print("Get current Color: ");
@@ -135,7 +134,7 @@ void WebServer::begin() {
 
         String effect = jsonDoc["effect"];
         int r = ledService.setMode(effect);
-        if (r == -1) { // TODO:  Better error message | throw exception
+        if (r == -1) {
           request->send(400, "application/json",
                         "{\"error\":\"Invalid Effect name\"}");
         }

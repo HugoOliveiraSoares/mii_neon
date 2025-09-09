@@ -16,8 +16,7 @@ WebServer webServer;
 Effects effects;
 LedService ledService;
 
-Segment seg1 = {0, NUM_LEDS_STRIP1};
-Segment seg2 = {NUM_LEDS_STRIP1, NUM_LEDS_STRIP2};
+Segment seg1 = {0, NUM_TOTAL_LEDS};
 
 unsigned long lastScanTime = 0;
 const unsigned long scanInterval = 10000; // 10 segundos
@@ -66,18 +65,6 @@ void setup() {
   } else {
     startAP();
   }
-
-  // WiFi.begin("ssid", "password");
-  // Serial.println("\n🔄 Conectando ao WiFi...");
-
-  // while (WiFi.status() != WL_CONNECTED) {
-  //   delay(1000);
-  //   Serial.print(".");
-  // }
-  //
-  // Serial.println("\n✅ Conectado ao WiFi!");
-  // Serial.print("📡 IP: ");
-  // Serial.println(WiFi.localIP());
 
   if (!MDNS.begin("mii-neon")) {
     Serial.println("Error setting up MDNS responder!");

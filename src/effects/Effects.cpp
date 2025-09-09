@@ -5,9 +5,7 @@ Effects::Effects() {}
 void Effects::init() {
 
   delay(1500);
-  FastLED.addLeds<WS2812B, 2, GRB>(leds, 0, NUM_LEDS_STRIP1)
-      .setCorrection(TypicalLEDStrip);
-  FastLED.addLeds<WS2812B, 0, GRB>(leds, NUM_LEDS_STRIP1, NUM_LEDS_STRIP2)
+  FastLED.addLeds<WS2812B, 2, GRB>(leds, 0, NUM_TOTAL_LEDS)
       .setCorrection(TypicalLEDStrip);
   FastLED.setBrightness(255);
   FastLED.clear();

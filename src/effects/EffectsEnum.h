@@ -29,7 +29,7 @@ inline const char *toString(EffectsEnum effect) {
     return "Cyclon";
   case ColorWipe:
     return "ColorWipe";
-  case ColorWipeInverse: // TODO: Implementar
+  case ColorWipeInverse:
     return "ColorWipeInverse";
   case SnowSparkle:
     return "SnowSparkle";

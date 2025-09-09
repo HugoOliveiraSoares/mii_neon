@@ -2,9 +2,7 @@
 #include "FastLED.h"
 #include <cstdint>
 
-#define NUM_LEDS_STRIP1 140
-#define NUM_LEDS_STRIP2 99
-#define NUM_TOTAL_LEDS NUM_LEDS_STRIP1 + NUM_LEDS_STRIP2
+#define NUM_TOTAL_LEDS 10
 
 #define MAX_POWER_MILLIAMPS 500
 
