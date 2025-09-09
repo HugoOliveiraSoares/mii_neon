@@ -31,16 +31,17 @@ void startAP() {
   Serial.println(WiFi.softAPIP());
 }
 
-void setup() {
-
-  Serial.begin(115200);
-  if (!LittleFS.begin()) {
-    Serial.println("❌ Falha ao montar o sistema de arquivos (LittleFS)!");
-    return;
-  }
+void startWifi() {
 
   String ssid, pass;
-  bool hasConfig = webServer.loadWiFiConfig(ssid, pass);
+  bool hasConfig = false;
+#if DEV_ENV
+  ssid = "";
+  pass = "";
+  hasConfig = true;
+#else
+  hasConfig = webServer.loadWiFiConfig(ssid, pass);
+#endif
 
   if (hasConfig) {
     WiFi.mode(WIFI_STA);
@@ -65,6 +66,20 @@ void setup() {
   } else {
     startAP();
   }
+}
+
+void setup() {
+
+  Serial.begin(115200);
+  delay(500);
+  Serial.printf("Starting in mode: %s\n", ENV_MODE);
+
+  if (!LittleFS.begin()) {
+    Serial.println("❌ Falha ao montar o sistema de arquivos (LittleFS)!");
+    return;
+  }
+
+  startWifi();
 
   if (!MDNS.begin("mii-neon")) {
     Serial.println("Error setting up MDNS responder!");
