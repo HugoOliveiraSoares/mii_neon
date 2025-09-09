@@ -23,7 +23,3 @@ create_tar:
 liveserver:
 	echo "Starting live-server"
 	live-server data
-
-mockserver:
-	echo "Starting mocko"
-	mocko -p 9090 --watch test/server-mock
