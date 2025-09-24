@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/style.css" />
     <link href="./css/style.css" rel="stylesheet" />
     <link rel="stylesheet" href="./libs/bootstrap.min.css" />
-    <script src="./js/main.js"></script>
+    <script type="module" src="./js/main.js"></script>
     <script src="./js/color-modes.js"></script>
     <script src="./libs/bootstrap.bundle.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -140,7 +140,7 @@
         <p>
           Selecione a rede Wi-Fi e insira a senha para conectar seu dispositivo.
         </p>
-        <form id="wifiForm" onsubmit="saveWifi(event)">
+        <form id="wifiForm">
           <div class="mb-3">
             <label for="ssid" class="form-label">Wi-Fi</label>
             <div class="input-group">
@@ -148,7 +148,7 @@
               <button
                 type="button"
                 class="btn btn-outline-secondary"
-                onclick="scanWifi()"
+                id="scanWifiBtn"
               >
                 Atualizar lista
               </button>
@@ -157,11 +157,16 @@
           <div class="mb-3">
             <label for="pass" class="form-label">Senha</label>
             <div class="input-group">
-              <input type="password" class="form-control" id="pass" required />
+              <input
+                type="password"
+                class="form-control"
+                id="ssidPass"
+                required
+              />
               <button
                 type="button"
                 class="btn btn-outline-secondary"
-                onclick="togglePassword()"
+                id="togglePasswordBtn"
               >
                 👁
               </button>
