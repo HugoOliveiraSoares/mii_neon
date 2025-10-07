@@ -41,10 +41,29 @@ export const Api = {
 
   scanWifi: () => fetch("/scan").then((r) => r.json()),
 
-  saveWifi: (formData) =>
-    fetch("/savewifi", { method: "POST", body: formData }).then((r) =>
-      r.json()
-    ),
+  saveWifi: async (formData) => {
+    const r = await fetch("/savewifi", {
+      method: "POST",
+      body: formData,
+    });
+    if (!r.ok) {
+      let message = "Erro desconhecido no servidor.";
+      try {
+        const err = await r.json();
+        message = err.status || err.message || message;
+      } catch {
+        message = await r.text();
+      }
+      throw new Error(`${r.status}: ${message}`);
+    }
+    return r.json();
+  },
 
   fetchWifiStatus: () => fetch("/wifistatus").then((r) => r.json()),
+
+  firmwareUpdate: (formData) =>
+    fetch("/update", {
+      method: "POST",
+      body: formData,
+    }).then((r) => r.json()),
 };

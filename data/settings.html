@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/style.css" />
     <link href="./css/style.css" rel="stylesheet" />
     <link rel="stylesheet" href="./libs/bootstrap.min.css" />
-    <script type="module" src="./js/main.js"></script>
+    <script type="module" src="./js/settings.js"></script>
     <script src="./js/color-modes.js"></script>
     <script src="./libs/bootstrap.bundle.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -224,12 +224,7 @@
           estiver atualizando!
         </p>
 
-        <form
-          id="firmwareForm"
-          method="POST"
-          action="/update"
-          enctype="multipart/form-data"
-        >
+        <form id="firmwareForm">
           <div class="mb-3">
             <label for="formFile" class="form-label">Atualize o firmware</label>
             <input
@@ -243,12 +238,7 @@
           <button type="submit" class="btn btn-primary">Atualizar</button>
         </form>
 
-        <form
-          id="fsForm"
-          method="POST"
-          action="/fsupdate"
-          enctype="multipart/form-data"
-        >
+        <form id="fsForm">
           <div class="mb-3">
             <label for="formFileFS" class="form-label"
               >Atualize o filesystem</label

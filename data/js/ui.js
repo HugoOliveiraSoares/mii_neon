@@ -111,57 +111,6 @@ export function showModal(modalId, msg = "") {
   modal.show();
 }
 
-// ========== Formulários ==========
-
-// Adiciona event listener para formulário de Wi-Fi
-export function setupWifiForm(formId, msgContainerId) {
-  const form = document.getElementById(formId);
-  if (!form) return;
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const ssid = form.querySelector("#ssid").value;
-    const pass = form.querySelector("#pass").value;
-    if (!ssid || !pass) {
-      showMessage("SSID e senha são obrigatórios.", msgContainerId);
-      return;
-    }
-    showMessage("Conectando...", msgContainerId);
-    const formData = new FormData(form);
-    try {
-      const data = await Api.saveWifi(formData);
-      if (data.status === "error") {
-        showModal("wifiFailModal", data.msg);
-        return;
-      }
-      // Polling para status (simplificado)
-      let tentativas = 0;
-      const maxTentativas = 20;
-      const intervalo = 10000;
-      const poll = setInterval(async () => {
-        tentativas++;
-        const statusData = await Api.fetchWifiStatus();
-        if (statusData.status === "success") {
-          showMessage("Conectado! Redirecionando...", msgContainerId);
-          clearInterval(poll);
-          setTimeout(() => (window.location.href = "/"), 2000);
-        } else if (
-          statusData.status === "fail" ||
-          tentativas >= maxTentativas
-        ) {
-          showModal(
-            "wifiFailModal",
-            "Falha ao conectar. Verifique SSID/senha.",
-          );
-          clearInterval(poll);
-        }
-      }, intervalo);
-    } catch (e) {
-      showModal("wifiFailModal", "Erro de comunicação");
-      showMessage("Erro de comunicação", msgContainerId);
-    }
-  });
-}
-
 // ========== Utilitários ==========
 
 // Preenche o select de redes Wi-Fi
