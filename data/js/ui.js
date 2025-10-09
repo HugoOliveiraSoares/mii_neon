@@ -1,8 +1,5 @@
 import { Api } from "./api.js";
 
-// ========== Factory Pattern ==========
-
-// Cria um botão de efeito (li) com classes Bootstrap
 export function createEffectButton(effectName) {
   const li = document.createElement("li");
   li.className = "btn btn-secondary w-100 my-2";
@@ -11,9 +8,6 @@ export function createEffectButton(effectName) {
   return li;
 }
 
-// ========== Renderização de UI ==========
-
-// Renderiza a lista de efeitos no container
 export function renderEffects(effects, containerId) {
   const container = document.getElementById(containerId);
   container.innerHTML = "";
@@ -22,13 +16,11 @@ export function renderEffects(effects, containerId) {
   });
 }
 
-// Atualiza o valor do brilho no input range
 export function setBrightToUi(value) {
   const input = document.getElementById("brightInput");
   if (input) input.value = value;
 }
 
-// Exibe uma mensagem no elemento informado
 export function showMessage(msg, containerId) {
   const el = document.getElementById(containerId);
   if (el) el.textContent = msg;
@@ -68,9 +60,6 @@ export async function setupColorPicker() {
   initColorPicker(hexColor);
 }
 
-// ========== Event Delegation ==========
-
-// Adiciona event delegation para seleção de efeito
 export function setupEffectsList(containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -87,7 +76,6 @@ export function setupEffectsList(containerId) {
   });
 }
 
-// Adiciona event delegation para mostrar/ocultar senha
 export function setupPasswordToggle(btnId, inputId) {
   const btn = document.getElementById(btnId);
   const input = document.getElementById(inputId);
@@ -97,9 +85,6 @@ export function setupPasswordToggle(btnId, inputId) {
   });
 }
 
-// ========== Modal Bootstrap ==========
-
-// Exibe um modal Bootstrap (requer Bootstrap JS)
 export function showModal(modalId, msg = "") {
   const modalEl = document.getElementById(modalId);
   if (!modalEl) return;
@@ -111,9 +96,6 @@ export function showModal(modalId, msg = "") {
   modal.show();
 }
 
-// ========== Utilitários ==========
-
-// Preenche o select de redes Wi-Fi
 export async function renderWifiNetworks() {
   const select = document.getElementById("ssid");
   select.innerHTML = "<option>Carregando...</option>";
@@ -184,6 +166,6 @@ function initColorPicker(_color) {
       },
     };
 
-    Api.setColor(_color); //Send color to server
+    Api.setColor(_color);
   });
 }
