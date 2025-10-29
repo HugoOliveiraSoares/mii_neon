@@ -115,15 +115,18 @@
         aria-labelledby="theme-tab"
       >
         <div class="mt-3">
-          <p>Selecione o tema da interface grafica</p>
+          <h2 class="h4">Aparência da Interface</h2>
+          <p>Escolha o tema visual que preferir</p>
+          <label for="bd-theme" class="form-label">Selecione um tema:</label>
           <select
             id="bd-theme"
             class="form-select"
-            aria-label="Default select example"
+            aria-label="Seletor de tema da interface"
+            aria-describedby="themeHelp"
           >
-            <option data-bs-theme-value="dark" selected value="1">Dark</option>
-            <option data-bs-theme-value="light" value="2">Light</option>
-            <option data-bs-theme-value="mii" value="3">Mii</option>
+            <option data-bs-theme-value="mii" selected value="1">Mii</option>
+            <option data-bs-theme-value="dark" value="2">Dark</option>
+            <option data-bs-theme-value="light" value="3">Light</option>
           </select>
         </div>
       </div>
@@ -184,74 +187,116 @@
         role="tabpanel"
         aria-labelledby="updates-tab"
       >
-        <h2>Atualizações</h2>
+        <h2 class="h4">Atualizações do Sistema</h2>
 
-        <p>
-          As atualizações não serão frequentes, mas sempre que achar um bug ou
-          quiser uma nova função, é só me avisar! Veja em "Suporte" como falar
-          comigo.
-        </p>
+        <div class="alert alert-info" role="status">
+          As atualizações não serão frequentes, mas se encontrar bugs ou quiser
+          novas funções, <br />
+          por favor entre em contato (veja a aba "Suporte").
+        </div>
 
-        <p>
-          <strong>O que é o firmware?</strong><br />
-          - É o "sistema" que faz o dispositivo funcionar.
-        </p>
+        <section class="mb-4">
+          <h3 class="h5">Entenda os tipos de atualização</h3>
+          <dl>
+            <dt><strong>Firmware</strong></dt>
+            <dd>É o sistema operacional que faz o dispositivo funcionar</dd>
 
-        <p>
-          <strong>O que é o filesystem?</strong><br />
-          - São os "arquivos" que o dispositivo usa, como páginas ou
-          configurações.
-        </p>
+            <dt><strong>Filesystem</strong></dt>
+            <dd>
+              São os arquivos da interface, como páginas web e configurações
+            </dd>
+          </dl>
+        </section>
 
-        <p><strong>Como atualizar:</strong></p>
+        <section class="mb-4">
+          <h3 class="h5">Como atualizar</h3>
 
-        <p><strong>1. Atualizar o sistema (firmware)</strong></p>
-        <ol>
-          <li>Selecione o arquivo <code>.bin</code>.</li>
-          <li>Clique no botão <strong>Atualizar</strong>.</li>
-          <li>Espere o dispositivo reiniciar sozinho.</li>
-        </ol>
-
-        <p><strong>2. Atualizar os arquivos (filesystem)</strong></p>
-        <ol>
-          <li>Selecione o arquivo <code>.tar</code>.</li>
-          <li>Clique no botão <strong>Atualizar</strong>.</li>
-          <li>Espere até aparecer a mensagem de confirmação.</li>
-        </ol>
-
-        <p id="atencao">
-          <strong>Importante:</strong> Não desligue o dispositivo enquanto ele
-          estiver atualizando!
-        </p>
-
-        <form id="firmwareForm">
-          <div class="mb-3">
-            <label for="formFile" class="form-label">Atualize o firmware</label>
-            <input
-              class="form-control"
-              type="file"
-              id="formFile"
-              name="update"
-              required
-            />
+          <div class="card mb-3">
+            <div class="card-header">
+              <strong>1. Atualizar o firmware (sistema)</strong>
+            </div>
+            <div class="card-body">
+              <ol>
+                <li>Selecione o arquivo com extensão <code>.bin</code></li>
+                <li>Clique no botão <strong>Atualizar</strong></li>
+                <li>Aguarde o dispositivo reiniciar automaticamente</li>
+              </ol>
+            </div>
           </div>
-          <button type="submit" class="btn btn-primary">Atualizar</button>
+          <div class="card mb-3">
+            <div class="card-header">
+              <strong>2. Atualizar o filesystem (arquivos)</strong>
+            </div>
+            <div class="card-body">
+              <ol>
+                <li>Selecione o arquivo com extensão <code>.tar</code></li>
+                <li>Clique no botão <strong>Atualizar</strong></li>
+                <li>Aguarde a mensagem de confirmação</li>
+              </ol>
+            </div>
+          </div>
+        </section>
+
+        <div class="alert alert-warning" role="alert">
+          <strong>⚠️ Atenção:</strong> Não desligue o dispositivo durante a
+          atualização! Isso pode danificar o sistema.
+        </div>
+
+        <form id="firmwareForm" class="mb-4" novalidate>
+          <fieldset>
+            <legend class="h5">Atualizar Firmware</legend>
+            <div class="mb-3">
+              <label for="formFile" class="form-label">
+                Selecione o arquivo .bin
+                <span class="text-danger" aria-label="obrigatório">*</span>
+              </label>
+              <input
+                class="form-control"
+                type="file"
+                id="formFile"
+                name="update"
+                accept=".bin"
+                required
+                aria-required="true"
+                aria-describedby="firmwareHelp"
+              />
+            </div>
+            <div
+              id="firmware-msg"
+              class="mb-3"
+              role="alert"
+              aria-live="polite"
+            ></div>
+            <button type="submit" class="btn btn-primary">
+              Atualizar Firmware
+            </button>
+          </fieldset>
         </form>
 
-        <form id="fsForm">
-          <div class="mb-3">
-            <label for="formFileFS" class="form-label"
-              >Atualize o filesystem</label
-            >
-            <input
-              class="form-control"
-              type="file"
-              id="formFileFS"
-              name="fsupdate"
-              required
-            />
-          </div>
-          <button type="submit" class="btn btn-primary">Atualizar</button>
+        <form id="fsForm" novalidate>
+          <fieldset>
+            <legend class="h5">Atualizar Filesystem</legend>
+            <div class="mb-3">
+              <label for="formFileFS" class="form-label">
+                Selecione o arquivo .tar
+                <span class="text-danger" aria-label="obrigatório">*</span>
+              </label>
+              <input
+                class="form-control"
+                type="file"
+                id="formFileFS"
+                name="fsupdate"
+                accept=".tar"
+                required
+                aria-required="true"
+                aria-describedby="fsHelp"
+              />
+            </div>
+            <div id="fs-msg" class="mb-3" role="alert" aria-live="polite"></div>
+            <button type="submit" class="btn btn-primary">
+              Atualizar Filesystem
+            </button>
+          </fieldset>
         </form>
       </div>
       <!-- END UPDATES -->
@@ -262,10 +307,11 @@
         role="tabpanel"
         aria-labelledby="info-tab"
       >
-        <h2>Encontrou bugs? Ou deseja novas funcionalidades?</h2>
+        <h2 class="h4">Suporte e Contato</h2>
         <p>
           Entre em contato comigo pelo e-mail ou Discord! <br />
-          Estou à disposição para ajudar e receber sugestões.
+          Estou à disposição para ajudar e receber sugestões. <br />
+          Feedback é sempre bem-vindo!
         </p>
 
         <div id="socials">
