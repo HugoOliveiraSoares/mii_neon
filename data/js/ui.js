@@ -1,21 +1,5 @@
 import { Api } from "./api.js";
 
-export function createEffectButton(effectName) {
-  const li = document.createElement("li");
-  li.className = "btn btn-secondary w-100 my-2";
-  li.textContent = effectName;
-  li.dataset.effect = effectName;
-  return li;
-}
-
-export function renderEffects(effects, containerId) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = "";
-  effects.forEach((effect) => {
-    container.appendChild(createEffectButton(effect));
-  });
-}
-
 export function setBrightToUi(value) {
   const input = document.getElementById("brightInput");
   if (input) input.value = value;
@@ -157,7 +141,7 @@ function initColorPicker(_color) {
     ],
   });
 
-  colorPicker.on("color:change", function (color) {
+  colorPicker.on("color:change", function(color) {
     const _color = {
       rgb: {
         r: color.red,

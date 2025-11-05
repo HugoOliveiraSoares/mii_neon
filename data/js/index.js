@@ -1,6 +1,5 @@
 import {
   adjustTabs,
-  renderEffects,
   setBrightToUi,
   setupColorPicker,
   setupEffectsList,
@@ -21,12 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("brightInput").addEventListener("input", (e) => {
         Api.setBright({ bright: e.target.value });
       });
-
-      // Carrega efeitos
-      const effectsData = await Api.fetchEffects();
-      if (effectsData.effects) {
-        renderEffects(effectsData.effects, "effects-container");
-      }
 
       // Carrega brilho
       const brightData = await Api.fetchBright();
