@@ -1,431 +1,306 @@
 <!doctype html>
 <html lang="pt" data-bs-theme="mii">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Configurações</title>
-    <link rel="stylesheet" href="css/theme.css" />
-    <link rel="stylesheet" href="css/style.css" />
-    <link href="./css/style.css" rel="stylesheet" />
-    <link rel="stylesheet" href="./libs/bootstrap.min.css" />
-    <script type="module" src="./js/settings.js"></script>
-    <script src="./js/color-modes.js"></script>
-    <script src="./libs/bootstrap.bundle.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body class="p-3 m-0 border-0 bd-example m-0 border-0">
-    <!-- Nav bar -->
-    <ul
-      class="nav nav-underline fixed-top nav-justified"
-      id="settings-options"
-      role="tablist"
-    >
-      <li class="nav-item" role="presentation">
-        <button class="nav-link">
-          <a href="/" style="text-decoration: none">
-            <div id="return-btn">
-              <span class="material-icons">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24px"
-                  viewBox="0 -960 960 960"
-                  width="24px"
-                >
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Configurações</title>
+  <link rel="stylesheet" href="css/theme.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="./css/style.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./libs/bootstrap.min.css" />
+  <script type="module" src="./js/settings.js"></script>
+  <script src="./js/color-modes.js"></script>
+  <script src="./libs/bootstrap.bundle.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet" />
+</head>
+
+<body class="p-3 m-0 border-0 bd-example m-0 border-0">
+  <!-- Nav bar -->
+  <ul class="nav nav-underline fixed-top nav-justified" id="settings-options" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link">
+        <a href="/" style="text-decoration: none">
+          <div id="return-btn">
+            <span class="material-icons">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+                <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+              </svg>
+            </span>
+            Voltar
+          </div>
+        </a>
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="theme-tab" data-bs-toggle="tab" data-bs-target="#theme" type="button"
+        role="tab" aria-controls="theme" aria-selected="true">
+        Tema
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="wifi-tab" data-bs-toggle="tab" data-bs-target="#wifi" type="button" role="tab"
+        aria-controls="wifi" aria-selected="false">
+        Wi-fi
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="updates-tab" data-bs-toggle="tab" data-bs-target="#updates" type="button" role="tab"
+        aria-controls="updates" aria-selected="false">
+        Atualizações
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab"
+        aria-controls="info" aria-selected="false">
+        Suporte
+      </button>
+    </li>
+  </ul>
+  <!-- END Nav bar -->
+
+  <!-- Container -->
+  <div class="tab-content" id="container">
+    <!-- Tema -->
+    <div class="tab-pane fade show active" id="theme" role="tabpanel" aria-labelledby="theme-tab">
+      <div class="mt-3">
+        <h2 class="h4">Aparência da Interface</h2>
+        <p>Escolha o tema que preferir</p>
+        <label for="bd-theme" class="form-label">Selecione um tema:</label>
+        <select id="bd-theme" class="form-select" aria-label="Seletor de tema da interface"
+          aria-describedby="themeHelp">
+          <option data-bs-theme-value="mii" selected value="1">Mii</option>
+          <option data-bs-theme-value="dark" value="2">Dark</option>
+          <option data-bs-theme-value="light" value="3">Light</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- END Tema -->
+    <!-- WIFI -->
+    <div class="tab-pane fade" id="wifi" role="tabpanel" aria-labelledby="wifi-tab">
+      <h2>Configurar Wi-Fi</h2>
+      <p>
+        Selecione a rede Wi-Fi e insira a senha para conectar seu dispositivo.
+      </p>
+      <form id="wifiForm">
+        <div class="mb-3">
+          <label for="ssid" class="form-label">Wi-Fi</label>
+          <div class="input-group">
+            <select class="form-select" id="ssid" required></select>
+            <button type="button" class="btn btn-outline-secondary" id="scanWifiBtn">
+              Buscar redes
+            </button>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="pass" class="form-label">Senha</label>
+          <div class="input-group">
+            <input type="password" class="form-control" id="ssidPass" required />
+            <button type="button" class="btn btn-outline-secondary" id="togglePasswordBtn" aria-label="Mostrar senha">
+              <span>
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                  fill="#e3e3e3">
                   <path
-                    d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"
-                  />
+                    d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" />
                 </svg>
               </span>
-              Voltar
-            </div>
-          </a>
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link active"
-          id="theme-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#theme"
-          type="button"
-          role="tab"
-          aria-controls="theme"
-          aria-selected="true"
-        >
-          Tema
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link"
-          id="wifi-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#wifi"
-          type="button"
-          role="tab"
-          aria-controls="wifi"
-          aria-selected="false"
-        >
-          Wi-fi
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link"
-          id="updates-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#updates"
-          type="button"
-          role="tab"
-          aria-controls="updates"
-          aria-selected="false"
-        >
-          Atualizações
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link"
-          id="info-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#info"
-          type="button"
-          role="tab"
-          aria-controls="info"
-          aria-selected="false"
-        >
-          Suporte
-        </button>
-      </li>
-    </ul>
-    <!-- END Nav bar -->
-
-    <!-- Container -->
-    <div class="tab-content" id="container">
-      <!-- Tema -->
-      <div
-        class="tab-pane fade show active"
-        id="theme"
-        role="tabpanel"
-        aria-labelledby="theme-tab"
-      >
-        <div class="mt-3">
-          <h2 class="h4">Aparência da Interface</h2>
-          <p>Escolha o tema visual que preferir</p>
-          <label for="bd-theme" class="form-label">Selecione um tema:</label>
-          <select
-            id="bd-theme"
-            class="form-select"
-            aria-label="Seletor de tema da interface"
-            aria-describedby="themeHelp"
-          >
-            <option data-bs-theme-value="mii" selected value="1">Mii</option>
-            <option data-bs-theme-value="dark" value="2">Dark</option>
-            <option data-bs-theme-value="light" value="3">Light</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- END Tema -->
-      <!-- WIFI -->
-      <div
-        class="tab-pane fade"
-        id="wifi"
-        role="tabpanel"
-        aria-labelledby="wifi-tab"
-      >
-        <h2>Configurar Wi-Fi</h2>
-        <p>
-          Selecione a rede Wi-Fi e insira a senha para conectar seu dispositivo.
-        </p>
-        <form id="wifiForm">
-          <div class="mb-3">
-            <label for="ssid" class="form-label">Wi-Fi</label>
-            <div class="input-group">
-              <select class="form-select" id="ssid" required></select>
-              <button
-                type="button"
-                class="btn btn-outline-secondary"
-                id="scanWifiBtn"
-              >
-                Atualizar lista
-              </button>
-            </div>
-          </div>
-          <div class="mb-3">
-            <label for="pass" class="form-label">Senha</label>
-            <div class="input-group">
-              <input
-                type="password"
-                class="form-control"
-                id="ssidPass"
-                required
-              />
-              <button
-                type="button"
-                class="btn btn-outline-secondary"
-                id="togglePasswordBtn"
-              >
-                👁
-              </button>
-            </div>
-          </div>
-          <div id="wifi-msg" class="mb-2"></div>
-          <button type="submit" class="btn btn-primary">Conectar</button>
-        </form>
-      </div>
-      <!-- END WIFI -->
-      <!-- UPDATES -->
-      <div
-        class="tab-pane fade"
-        id="updates"
-        role="tabpanel"
-        aria-labelledby="updates-tab"
-      >
-        <h2 class="h4">Atualizações do Sistema</h2>
-
-        <div class="alert alert-info" role="status">
-          As atualizações não serão frequentes, mas se encontrar bugs ou quiser
-          novas funções, <br />
-          por favor entre em contato (veja a aba "Suporte").
-        </div>
-
-        <section class="mb-4">
-          <h3 class="h5">Entenda os tipos de atualização</h3>
-          <dl>
-            <dt><strong>Firmware</strong></dt>
-            <dd>É o sistema operacional que faz o dispositivo funcionar</dd>
-
-            <dt><strong>Filesystem</strong></dt>
-            <dd>
-              São os arquivos da interface, como páginas web e configurações
-            </dd>
-          </dl>
-        </section>
-
-        <section class="mb-4">
-          <h3 class="h5">Como atualizar</h3>
-
-          <div class="card mb-3">
-            <div class="card-header">
-              <strong>1. Atualizar o firmware (sistema)</strong>
-            </div>
-            <div class="card-body">
-              <ol>
-                <li>Selecione o arquivo com extensão <code>.bin</code></li>
-                <li>Clique no botão <strong>Atualizar</strong></li>
-                <li>Aguarde o dispositivo reiniciar automaticamente</li>
-              </ol>
-            </div>
-          </div>
-          <div class="card mb-3">
-            <div class="card-header">
-              <strong>2. Atualizar o filesystem (arquivos)</strong>
-            </div>
-            <div class="card-body">
-              <ol>
-                <li>Selecione o arquivo com extensão <code>.tar</code></li>
-                <li>Clique no botão <strong>Atualizar</strong></li>
-                <li>Aguarde a mensagem de confirmação</li>
-              </ol>
-            </div>
-          </div>
-        </section>
-
-        <div class="alert alert-warning" role="alert">
-          <strong>⚠️ Atenção:</strong> Não desligue o dispositivo durante a
-          atualização! Isso pode danificar o sistema.
-        </div>
-
-        <form id="firmwareForm" class="mb-4" novalidate>
-          <fieldset>
-            <legend class="h5">Atualizar Firmware</legend>
-            <div class="mb-3">
-              <label for="formFile" class="form-label">
-                Selecione o arquivo .bin
-                <span class="text-danger" aria-label="obrigatório">*</span>
-              </label>
-              <input
-                class="form-control"
-                type="file"
-                id="formFile"
-                name="update"
-                accept=".bin"
-                required
-                aria-required="true"
-                aria-describedby="firmwareHelp"
-              />
-            </div>
-            <div
-              id="firmware-msg"
-              class="mb-3"
-              role="alert"
-              aria-live="polite"
-            ></div>
-            <button type="submit" class="btn btn-primary">
-              Atualizar Firmware
             </button>
-          </fieldset>
-        </form>
-
-        <form id="fsForm" novalidate>
-          <fieldset>
-            <legend class="h5">Atualizar Filesystem</legend>
-            <div class="mb-3">
-              <label for="formFileFS" class="form-label">
-                Selecione o arquivo .tar
-                <span class="text-danger" aria-label="obrigatório">*</span>
-              </label>
-              <input
-                class="form-control"
-                type="file"
-                id="formFileFS"
-                name="fsupdate"
-                accept=".tar"
-                required
-                aria-required="true"
-                aria-describedby="fsHelp"
-              />
-            </div>
-            <div id="fs-msg" class="mb-3" role="alert" aria-live="polite"></div>
-            <button type="submit" class="btn btn-primary">
-              Atualizar Filesystem
-            </button>
-          </fieldset>
-        </form>
-      </div>
-      <!-- END UPDATES -->
-      <!-- SUPORT INFO -->
-      <div
-        class="tab-pane fade"
-        id="info"
-        role="tabpanel"
-        aria-labelledby="info-tab"
-      >
-        <h2 class="h4">Suporte e Contato</h2>
-        <p>
-          Entre em contato comigo pelo e-mail ou Discord! <br />
-          Estou à disposição para ajudar e receber sugestões. <br />
-          Feedback é sempre bem-vindo!
-        </p>
-
-        <div id="socials">
-          <span class="material-icons">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="24px"
-              viewBox="0 -960 960 960"
-              width="24px"
-              fill="var(--bs-body-color)"
-            >
-              <path
-                d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z"
-              />
-            </svg>
-          </span>
-          <a class="contacts" href="mailto:hugoliveira.soares@gmail.com"
-            >hugoliveira.soares@gmail.com</a
-          >
+          </div>
         </div>
-
-        <div id="socials">
-          <span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="24px"
-              viewBox="0 0 48 48"
-              width="24px"
-              fill="var(--bs-body-color)"
-            >
-              <path
-                d="M20.1,20.5a2.3,2.3,0,0,0-2.2,2.4,2.3,2.3,0,0,0,2.2,2.4,2.4,2.4,0,0,0,0-4.8Z"
-              />
-              <path d="M28,20.5a2.4,2.4,0,1,0,2.2,2.4A2.3,2.3,0,0,0,28,20.5Z" />
-              <path
-                d="M38.5,2H9.5A4.5,4.5,0,0,0,5,6.5V36.3a4.5,4.5,0,0,0,4.5,4.5H34.1l-1.2-4.1,2.8,2.7,2.6,2.4L43,46V6.5A4.5,4.5,0,0,0,38.5,2ZM30.2,30.7l-1.5-1.8a6.9,6.9,0,0,0,4-2.6,15.1,15.1,0,0,1-2.5,1.3,14.6,14.6,0,0,1-3.2,1,15,15,0,0,1-5.6,0,20.2,20.2,0,0,1-3.2-1l-1.6-.7h-.2c0-.1,0-.1-.1-.1l-.6-.4a6.9,6.9,0,0,0,3.8,2.6l-1.4,1.8a8,8,0,0,1-6.7-3.3,29,29,0,0,1,3.2-12.8,10.3,10.3,0,0,1,6.1-2.3l.2.2a15.4,15.4,0,0,0-5.7,2.9l1.3-.6a12.7,12.7,0,0,1,4.9-1.4h.4a20.6,20.6,0,0,1,4.3,0,16.3,16.3,0,0,1,6.6,2.1,13.5,13.5,0,0,0-5.4-2.8l.3-.3a10.3,10.3,0,0,1,6.1,2.3,29.7,29.7,0,0,1,3.1,12.8S35,30.6,30.2,30.7Z"
-              />
-            </svg>
-          </span>
-          <a
-            class="contacts"
-            href="https://discord.com/users/hugosoares01"
-            target="_blank"
-            >hugosoares01</a
-          >
-        </div>
-      </div>
-      <!-- END SUPORT INFO -->
+        <div id="wifi-msg" class="mb-2"></div>
+        <button type="submit" class="btn btn-primary">Conectar</button>
+      </form>
     </div>
-    <!-- END Container -->
-    <div id="modalContainer">
-      <div
-        class="modal fade"
-        id="wifiFailModal"
-        tabindex="-1"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-              <h5 class="modal-title">Falha ao se conectar no dispositivo</h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-              ></button>
-            </div>
-            <div class="modal-body">
-              Não foi possível conectar ao dispositivo.<br />
-              Verifique o led na parte traseira, se estiver vermelho o
-              dispositivo não conseguir se conectar a sua rede wifi. Verifique
-              SSID e senha e tente novamente.
-              <br />
-              Se o led estiver verde o dispositivo se conectou a rede wifi,
-              conect-se na mesma rede e acesse:
-              <code>http://mii-neon.local</code> ou pelo IP que ele recebeu.
-              <div id="msg-modal" class="mb-2"></div>
-            </div>
-            <div class="modal-footer">
-              <button class="btn btn-secondary" data-bs-dismiss="modal">
-                Fechar
-              </button>
-            </div>
+    <!-- END WIFI -->
+    <!-- UPDATES -->
+    <div class="tab-pane fade" id="updates" role="tabpanel" aria-labelledby="updates-tab">
+      <h2 class="h4">Atualizações do Sistema</h2>
+
+      <div class="alert alert-info" role="status">
+        As atualizações não serão frequentes, mas se encontrar bugs ou quiser
+        novas funções, <br />
+        por favor entre em contato (veja a aba "Suporte").
+      </div>
+
+      <section class="mb-4">
+        <h3 class="h5">Entenda os tipos de atualização</h3>
+        <dl>
+          <dt><strong>Firmware</strong></dt>
+          <dd>É o sistema operacional que faz o dispositivo funcionar</dd>
+
+          <dt><strong>Filesystem</strong></dt>
+          <dd>
+            São os arquivos da interface, como páginas web e configurações
+          </dd>
+        </dl>
+      </section>
+
+      <section class="mb-4">
+        <h3 class="h5">Como atualizar</h3>
+
+        <div class="card mb-3">
+          <div class="card-header">
+            <strong>1. Atualizar o firmware (sistema)</strong>
+          </div>
+          <div class="card-body">
+            <ol>
+              <li>Selecione o arquivo com extensão <code>.bin</code></li>
+              <li>Clique no botão <strong>Atualizar</strong></li>
+              <li>Aguarde o dispositivo reiniciar automaticamente</li>
+            </ol>
           </div>
         </div>
+        <div class="card mb-3">
+          <div class="card-header">
+            <strong>2. Atualizar o filesystem (arquivos)</strong>
+          </div>
+          <div class="card-body">
+            <ol>
+              <li>Selecione o arquivo com extensão <code>.tar</code></li>
+              <li>Clique no botão <strong>Atualizar</strong></li>
+              <li>Aguarde a mensagem de confirmação</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <div class="alert alert-warning" role="alert">
+        <strong>⚠️ Atenção:</strong> Não desligue o dispositivo durante a
+        atualização! Isso pode danificar o sistema.
       </div>
-      <div
-        class="modal fade"
-        id="wifiSaveFailModal"
-        tabindex="-1"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-              <h5 class="modal-title">Falha ao configurar wifi</h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-              ></button>
-            </div>
-            <div class="modal-body">
-              Erro ao salvar Wifi-Fi
-              <div id="msg-modal" class="mb-2"></div>
-            </div>
-            <div class="modal-footer">
-              <button class="btn btn-secondary" data-bs-dismiss="modal">
-                Fechar
-              </button>
-            </div>
+
+      <form id="firmwareForm" class="mb-4" novalidate>
+        <fieldset>
+          <legend class="h5">Atualizar Firmware</legend>
+          <div class="mb-3">
+            <label for="formFile" class="form-label">
+              Selecione o arquivo .bin
+              <span class="text-danger" aria-label="obrigatório">*</span>
+            </label>
+            <input class="form-control" type="file" id="formFile" name="update" accept=".bin" required
+              aria-required="true" aria-describedby="firmwareHelp" />
+          </div>
+          <div id="firmware-msg" class="mb-3" role="alert" aria-live="polite"></div>
+          <button type="submit" class="btn btn-primary">
+            Atualizar Firmware
+          </button>
+        </fieldset>
+      </form>
+
+      <form id="fsForm" novalidate>
+        <fieldset>
+          <legend class="h5">Atualizar Filesystem</legend>
+          <div class="mb-3">
+            <label for="formFileFS" class="form-label">
+              Selecione o arquivo .tar
+              <span class="text-danger" aria-label="obrigatório">*</span>
+            </label>
+            <input class="form-control" type="file" id="formFileFS" name="fsupdate" accept=".tar" required
+              aria-required="true" aria-describedby="fsHelp" />
+          </div>
+          <div id="fs-msg" class="mb-3" role="alert" aria-live="polite"></div>
+          <button type="submit" class="btn btn-primary">
+            Atualizar Filesystem
+          </button>
+        </fieldset>
+      </form>
+    </div>
+    <!-- END UPDATES -->
+    <!-- SUPORT INFO -->
+    <div class="tab-pane fade" id="info" role="tabpanel" aria-labelledby="info-tab">
+      <h2 class="h4">Suporte e Contato</h2>
+      <p>
+        Entre em contato comigo pelo e-mail ou Discord! <br />
+        Estou à disposição para ajudar e receber sugestões. <br />
+        Feedback é sempre bem-vindo!
+      </p>
+
+      <div id="socials">
+        <span class="material-icons">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+            fill="var(--bs-body-color)">
+            <path
+              d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z" />
+          </svg>
+        </span>
+        <a class="contacts" href="mailto:hugoliveira.soares@gmail.com">hugoliveira.soares@gmail.com</a>
+      </div>
+
+      <div id="socials">
+        <span>
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 48 48" width="24px"
+            fill="var(--bs-body-color)">
+            <path d="M20.1,20.5a2.3,2.3,0,0,0-2.2,2.4,2.3,2.3,0,0,0,2.2,2.4,2.4,2.4,0,0,0,0-4.8Z" />
+            <path d="M28,20.5a2.4,2.4,0,1,0,2.2,2.4A2.3,2.3,0,0,0,28,20.5Z" />
+            <path
+              d="M38.5,2H9.5A4.5,4.5,0,0,0,5,6.5V36.3a4.5,4.5,0,0,0,4.5,4.5H34.1l-1.2-4.1,2.8,2.7,2.6,2.4L43,46V6.5A4.5,4.5,0,0,0,38.5,2ZM30.2,30.7l-1.5-1.8a6.9,6.9,0,0,0,4-2.6,15.1,15.1,0,0,1-2.5,1.3,14.6,14.6,0,0,1-3.2,1,15,15,0,0,1-5.6,0,20.2,20.2,0,0,1-3.2-1l-1.6-.7h-.2c0-.1,0-.1-.1-.1l-.6-.4a6.9,6.9,0,0,0,3.8,2.6l-1.4,1.8a8,8,0,0,1-6.7-3.3,29,29,0,0,1,3.2-12.8,10.3,10.3,0,0,1,6.1-2.3l.2.2a15.4,15.4,0,0,0-5.7,2.9l1.3-.6a12.7,12.7,0,0,1,4.9-1.4h.4a20.6,20.6,0,0,1,4.3,0,16.3,16.3,0,0,1,6.6,2.1,13.5,13.5,0,0,0-5.4-2.8l.3-.3a10.3,10.3,0,0,1,6.1,2.3,29.7,29.7,0,0,1,3.1,12.8S35,30.6,30.2,30.7Z" />
+          </svg>
+        </span>
+        <a class="contacts" href="https://discord.com/users/hugosoares01" target="_blank">hugosoares01</a>
+      </div>
+      <div id="socials">
+        <span>
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
+            <path
+              d="M440-280H280q-83 0-141.5-58.5T80-480q0-83 58.5-141.5T280-680h160v80H280q-50 0-85 35t-35 85q0 50 35 85t85 35h160v80ZM320-440v-80h320v80H320Zm200 160v-80h160q50 0 85-35t35-85q0-50-35-85t-85-35H520v-80h160q83 0 141.5 58.5T880-480q0 83-58.5 141.5T680-280H520Z" />
+          </svg>
+        </span>
+        <a class="contacts" href="https://hugosoares.is-a.dev/" target="_blank">hugosoares.is-a.dev</a>
+      </div>
+    </div>
+    <!-- END SUPORT INFO -->
+  </div>
+  <!-- END Container -->
+  <div id="modalContainer">
+    <div class="modal fade" id="wifiFailModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title">Falha ao se conectar no dispositivo</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            Não foi possível conectar ao dispositivo.<br />
+            Verifique o led na parte traseira, se estiver vermelho o
+            dispositivo não conseguir se conectar a sua rede wifi. Verifique
+            SSID e senha e tente novamente.
+            <br />
+            Se o led estiver verde o dispositivo se conectou a rede wifi,
+            conect-se na mesma rede e acesse:
+            <code>http://mii-neon.local</code> ou pelo IP que ele recebeu.
+            <div id="msg-modal" class="mb-2"></div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">
+              Fechar
+            </button>
           </div>
         </div>
       </div>
     </div>
-  </body>
+    <div class="modal fade" id="wifiSaveFailModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title">Falha ao configurar wifi</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            Erro ao salvar Wifi-Fi
+            <div id="msg-modal" class="mb-2"></div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">
+              Fechar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
 </html>
