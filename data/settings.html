@@ -13,24 +13,21 @@
   <script src="./js/color-modes.js"></script>
   <script src="./libs/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="css/fonts.css" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 </head>
 
 <body class="p-3 m-0 border-0 bd-example m-0 border-0">
   <!-- Nav bar -->
   <ul class="nav nav-underline fixed-top nav-justified" id="settings-options" role="tablist">
     <li class="nav-item" role="presentation">
-      <button class="nav-link">
-        <a href="/" style="text-decoration: none">
-          <div id="return-btn">
-            <span class="material-icons">
-              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
-                <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
-              </svg>
-            </span>
-            Voltar
-          </div>
-        </a>
-      </button>
+      <a class="nav-link" href="/" id="return-btn">
+        <span class="material-icons">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+            <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+          </svg>
+        </span>
+        Voltar
+      </a>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link active" id="theme-tab" data-bs-toggle="tab" data-bs-target="#theme" type="button"

@@ -188,10 +188,7 @@ a.btn:hover #configBtn {
 }
 
 #return-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  color: var(--bs-link-color) !important;
 }
 
 #return-btn span svg {
