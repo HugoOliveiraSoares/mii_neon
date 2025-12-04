@@ -97,22 +97,6 @@ void WebServer::begin() {
     request->send(200, "application/json", response);
   });
 
-  server.on("/effects", HTTP_GET, [](AsyncWebServerRequest *request) {
-    std::vector<String> effectsList = ledService.getModes();
-
-    DynamicJsonDocument jsonDoc(JSON_ARRAY_SIZE(effectsList.size()) +
-                                JSON_OBJECT_SIZE(1) + 200);
-    JsonArray effectsArray = jsonDoc.createNestedArray("effects");
-
-    for (const String &effectName : effectsList) {
-      effectsArray.add(effectName);
-    }
-
-    String response;
-    serializeJson(jsonDoc, response);
-    request->send(200, "application/json", response);
-  });
-
   server.on(
       "/effects", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
       [](AsyncWebServerRequest *request, uint8_t *data, size_t len,
