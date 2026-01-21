@@ -2,137 +2,192 @@
 
 // Strip management methods
 void Effects::initAllStrips() {
-    for (auto& strip : strips) {
-        strip->init();
-    }
+  for (auto &strip : strips) {
+    strip->init();
+  }
 }
 
 void Effects::showAllStrips() {
-    for (auto& strip : strips) {
-        strip->show();
-    }
+  for (auto &strip : strips) {
+    strip->show();
+  }
 }
 
 // Basic LED control methods
 void Effects::setLedColor(const CRGB &color, int stripIndex, int pos) {
-    if (stripIndex >= 0 && stripIndex < strips.size()) {
-        strips[stripIndex]->setLedColor(color, pos);
-    }
+  if (stripIndex >= 0 && stripIndex < strips.size()) {
+    strips[stripIndex]->setLedColor(color, pos);
+  }
 }
 
 void Effects::fillStrip(const CRGB &color, int stripIndex) {
-    if (stripIndex >= 0 && stripIndex < strips.size()) {
-        strips[stripIndex]->fill(color);
-    }
+  if (stripIndex >= 0 && stripIndex < strips.size()) {
+    strips[stripIndex]->fill(color);
+  }
 }
 
 void Effects::fillAllStrips(const CRGB &color) {
-    for (auto& strip : strips) {
-        strip->fill(color);
-    }
+  for (auto &strip : strips) {
+    strip->fill(color);
+  }
 }
 
 void Effects::fillSegment(const CRGB &color, int stripIndex, Segment segment) {
-    if (stripIndex >= 0 && stripIndex < strips.size()) {
-        int endPos = segment.start + segment.length;
-        int numLeds = strips[stripIndex]->getNumTotalLeds();
-        
-        // Ensure segment doesn't exceed strip bounds
-        if (segment.start < 0 || segment.start >= numLeds) {
-            return;
-        }
-        if (endPos > numLeds) {
-            endPos = numLeds;
-        }
-        
-        // Fill the segment one LED at a time
-        for (int i = segment.start; i < endPos; i++) {
-            strips[stripIndex]->setLedColor(color, i);
-        }
+  if (stripIndex >= 0 && stripIndex < strips.size()) {
+    int endPos = segment.start + segment.length;
+    int numLeds = strips[stripIndex]->getNumTotalLeds();
+
+    // Ensure segment doesn't exceed strip bounds
+    if (segment.start < 0 || segment.start >= numLeds) {
+      return;
     }
+    if (endPos > numLeds) {
+      endPos = numLeds;
+    }
+
+    // Fill the segment one LED at a time
+    for (int i = segment.start; i < endPos; i++) {
+      strips[stripIndex]->setLedColor(color, i);
+    }
+  }
 }
 
 // Getters
-unsigned long Effects::getLastUpdate() const {
-    return this->lastUpdate;
-}
+unsigned long Effects::getLastUpdate() const { return this->lastUpdate; }
 
 void Effects::setLastUpdate(unsigned long newUpdate) {
-    this->lastUpdate = newUpdate;
+  this->lastUpdate = newUpdate;
 }
 
-int Effects::getStripCount() const {
-    return strips.size();
-}
+int Effects::getStripCount() const { return strips.size(); }
 
 int Effects::getStripLedCount(int stripIndex) const {
-    if (stripIndex >= 0 && stripIndex < strips.size()) {
-        return strips[stripIndex]->getNumTotalLeds();
-    }
-    return 0;
+  if (stripIndex >= 0 && stripIndex < strips.size()) {
+    return strips[stripIndex]->getNumTotalLeds();
+  }
+  return 0;
 }
 
 // Blink effects implementation
 void Effects::blink(const CRGB &color, const CRGB &color2, int time) {
-    if (millis() - lastUpdate > time) {
-        if (state.isOn) {
-            fillAllStrips(color2);
-        } else {
-            fillAllStrips(color);
-        }
-        state.isOn = !state.isOn;
-        lastUpdate = millis();
-        
-        // Synchronized show across all strips
-        showAllStrips();
+  if (millis() - lastUpdate > time) {
+    if (state.isOn) {
+      fillAllStrips(color2);
+    } else {
+      fillAllStrips(color);
     }
+    state.isOn = !state.isOn;
+    lastUpdate = millis();
+
+    // Synchronized show across all strips
+    showAllStrips();
+  }
 }
 
-void Effects::blink(const CRGB &color) {
-    blink(color, CRGB::Black, 1000);
-}
+void Effects::blink(const CRGB &color) { blink(color, CRGB::Black, 1000); }
 
 void Effects::blink(const CRGB &color, const CRGB &color2) {
-    blink(color, color2, 1000);
+  blink(color, color2, 1000);
 }
 
 // ColorWipe effects implementation
 void Effects::colorWipe(const CRGB &color, const CRGB &color2, int time) {
-    if (millis() - lastUpdate >= time) {
-        lastUpdate = millis();
-        
-        for (auto& strip : strips) {
-            int maxLeds = strip->getNumTotalLeds();
-            if (state.currentLed < maxLeds) {
-                CRGB ledColor = state.isOn ? color : color2;
-                strip->setLedColor(ledColor, state.currentLed);
-            }
-        }
-        
-        state.currentLed++;
-        
-        // Check if all strips are complete
-        bool allStripsComplete = true;
-        for (auto& strip : strips) {
-            if (state.currentLed < strip->getNumTotalLeds()) {
-                allStripsComplete = false;
-                break;
-            }
-        }
-        
-        if (allStripsComplete) {
-            state.currentLed = 0;
-            state.isOn = !state.isOn;
-        }
-        
-        showAllStrips();
+  if (millis() - lastUpdate >= time) {
+    lastUpdate = millis();
+
+    for (auto &strip : strips) {
+      int maxLeds = strip->getNumTotalLeds();
+      if (state.currentLed < maxLeds) {
+        CRGB ledColor = state.isOn ? color : color2;
+        strip->setLedColor(ledColor, state.currentLed);
+      }
     }
+
+    state.currentLed++;
+
+    // Check if all strips are complete
+    bool allStripsComplete = true;
+    for (auto &strip : strips) {
+      if (state.currentLed < strip->getNumTotalLeds()) {
+        allStripsComplete = false;
+        break;
+      }
+    }
+
+    if (allStripsComplete) {
+      state.currentLed = 0;
+      state.isOn = !state.isOn;
+    }
+
+    showAllStrips();
+  }
 }
 
 void Effects::colorWipe(const CRGB &color, int time) {
-    colorWipe(color, CRGB::Black, time);
+  colorWipe(color, CRGB::Black, time);
 }
 
 void Effects::colorWipe(const CRGB &color) {
-    colorWipe(color, CRGB::Black, 50);
+  colorWipe(color, CRGB::Black, 50);
+}
+
+// Cyclon helper methods
+void Effects::cyclonUpdatePosition() {
+  if (cyclonState.direction) {
+    cyclonState.currentLed++;
+
+    // Check if reached max (use 100 as normalized max for scaling)
+    if (cyclonState.currentLed >= 100) {
+      cyclonState.currentLed = 100;
+      cyclonState.direction = false;
+    }
+  } else {
+    cyclonState.currentLed--;
+
+    if (cyclonState.currentLed < 0) {
+      cyclonState.currentLed = 0;
+      cyclonState.direction = true;
+    }
+  }
+}
+
+void Effects::fadeAllGlobal() {
+  for (auto &strip : strips) {
+    int numLeds = strip->getNumTotalLeds();
+    CRGB *stripLeds = strip->getLeds();
+
+    for (int i = 0; i < numLeds; i++) {
+      stripLeds[i].nscale8(250);
+    }
+  }
+}
+
+// Main cyclon effect implementation
+void Effects::cyclon() {
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - lastUpdate >= CyclonState::UPDATE_INTERVAL) {
+    lastUpdate = currentMillis;
+
+    // Process all strips
+    for (size_t stripIndex = 0; stripIndex < strips.size(); stripIndex++) {
+      int numLeds = strips[stripIndex]->getNumTotalLeds();
+      CRGB *stripLeds = strips[stripIndex]->getLeds();
+
+      // Calculate scaled position for this strip's length
+      int scaledPosition = map(cyclonState.currentLed, 0, 100, 0, numLeds - 1);
+
+      // Set current LED with shared HSV color
+      stripLeds[scaledPosition] = CHSV(cyclonState.hue++, 255, 255);
+    }
+
+    // Apply global fade to all strips
+    fadeAllGlobal();
+
+    // Update shared movement state
+    cyclonUpdatePosition();
+
+    // Synchronized show across all strips
+    showAllStrips();
+  }
 }

@@ -15,6 +15,7 @@ public:
     virtual int getNumTotalLeds() const = 0;
     virtual CRGB getCurrentColor() const = 0;
     virtual void show() = 0;
+    virtual CRGB* getLeds() = 0;
 };
 
 template <uint8_t DATA_PIN> class LedStrip : public ILedStrip {
@@ -29,6 +30,7 @@ public:
   int getNumTotalLeds() const;
   CRGB getCurrentColor() const;
   void show();
+  CRGB* getLeds();
 
 private:
   std::vector<CRGB> leds;
@@ -86,4 +88,8 @@ template <uint8_t DATA_PIN> CRGB LedStrip<DATA_PIN>::getCurrentColor() const {
 
 template <uint8_t DATA_PIN> void LedStrip<DATA_PIN>::show() {
   FastLED.show();
+}
+
+template <uint8_t DATA_PIN> CRGB* LedStrip<DATA_PIN>::getLeds() {
+  return leds.data();
 }
