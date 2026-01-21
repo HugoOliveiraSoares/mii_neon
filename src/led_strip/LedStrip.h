@@ -2,8 +2,22 @@
 #include <FastLED.h>
 #include <cstdint>
 #include <vector>
+#include <memory>
 
-template <uint8_t DATA_PIN> class LedStrip {
+// Abstract interface for LED strip operations
+class ILedStrip {
+public:
+    virtual ~ILedStrip() = default;
+    virtual void init() = 0;
+    virtual void setLedColor(const CRGB &color, int pos) = 0;
+    virtual void fill(const CRGB &color) = 0;
+    virtual void fill(const CRGB &color, int length) = 0;
+    virtual int getNumTotalLeds() const = 0;
+    virtual CRGB getCurrentColor() const = 0;
+    virtual void show() = 0;
+};
+
+template <uint8_t DATA_PIN> class LedStrip : public ILedStrip {
 public:
   explicit LedStrip(int numTotalLeds);
 
@@ -14,6 +28,7 @@ public:
 
   int getNumTotalLeds() const;
   CRGB getCurrentColor() const;
+  void show();
 
 private:
   std::vector<CRGB> leds;
@@ -44,7 +59,6 @@ void LedStrip<DATA_PIN>::setLedColor(const CRGB &color, int pos) {
 
   leds[pos] = color;
   currentColor = color;
-  FastLED.show();
 }
 
 template <uint8_t DATA_PIN> void LedStrip<DATA_PIN>::fill(const CRGB &color) {
@@ -60,7 +74,6 @@ void LedStrip<DATA_PIN>::fill(const CRGB &color, int length) {
   }
 
   currentColor = color;
-  FastLED.show();
 }
 
 template <uint8_t DATA_PIN> int LedStrip<DATA_PIN>::getNumTotalLeds() const {
@@ -69,4 +82,8 @@ template <uint8_t DATA_PIN> int LedStrip<DATA_PIN>::getNumTotalLeds() const {
 
 template <uint8_t DATA_PIN> CRGB LedStrip<DATA_PIN>::getCurrentColor() const {
   return currentColor;
+}
+
+template <uint8_t DATA_PIN> void LedStrip<DATA_PIN>::show() {
+  FastLED.show();
 }
