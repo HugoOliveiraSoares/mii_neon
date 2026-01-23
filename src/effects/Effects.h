@@ -68,8 +68,11 @@ public:
   void cyclon();
 
   // RainbowCycle effects
-  void rainbowCycle(int speedDelay); // Customizable speed
-  void rainbowCycle();               // Default 20ms timing
+  void rainbowCycle(int speedDelay);
+  void rainbowCycle();
+
+  void snowSparkle(CRGB color);
+  void snowSparkle(CRGB color, int sparkleDelay);
 
   // Getters
   unsigned long getLastUpdate() const;

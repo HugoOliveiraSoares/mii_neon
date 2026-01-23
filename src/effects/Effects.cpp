@@ -232,3 +232,33 @@ void Effects::rainbowCycle(int speedDelay) {
 }
 
 void Effects::rainbowCycle() { rainbowCycle(20); }
+
+/*
+ *
+ * SnowSparkle Effect
+ *
+ */
+
+void Effects::snowSparkle(CRGB color) { this->snowSparkle(color, 15); }
+
+void Effects::snowSparkle(CRGB color, int sparkleDelay) {
+  this->fillAllStrips(color);
+
+  int strip1 = random(0, strips.size());
+  int strip2 = random(0, strips.size());
+
+  int Pixel1 = random(strips[strip1]->getNumTotalLeds());
+  int Pixel2 = random(strips[strip2]->getNumTotalLeds());
+
+  this->setLedColor(CRGB::Black, strip1, Pixel1);
+  this->setLedColor(CRGB::Black, strip2, Pixel2);
+  this->showAllStrips();
+
+  delay(sparkleDelay);
+
+  this->setLedColor(color, strip1, Pixel1);
+  this->setLedColor(color, strip2, Pixel2);
+  this->showAllStrips();
+
+  delay(random(100, 1000));
+}
