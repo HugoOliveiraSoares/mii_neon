@@ -33,6 +33,12 @@ private:
   };
   CyclonState cyclonState;
 
+  struct RainbowCycleState {
+    uint16_t phaseOffset = 0;
+    unsigned long lastUpdate = 0;
+  };
+  RainbowCycleState rainbowState;
+
 public:
   // Strip management methods
   template <uint8_t PIN> void addStrip(int numLeds);
@@ -60,6 +66,10 @@ public:
 
   // Cyclon effect
   void cyclon();
+
+  // RainbowCycle effects
+  void rainbowCycle(int speedDelay); // Customizable speed
+  void rainbowCycle();               // Default 20ms timing
 
   // Getters
   unsigned long getLastUpdate() const;

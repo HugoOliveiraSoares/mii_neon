@@ -191,3 +191,44 @@ void Effects::cyclon() {
     showAllStrips();
   }
 }
+
+/*
+ *
+ * RainbowCycle Effect
+ *
+ */
+
+// RainbowCycle helper function - preserve exact wheel algorithm
+static CRGB wheel(uint8_t wheelPos) {
+  if (wheelPos < 85) {
+    return CRGB(wheelPos * 3, 255 - wheelPos * 3, 0);
+  } else if (wheelPos < 170) {
+    wheelPos -= 85;
+    return CRGB(255 - wheelPos * 3, 0, wheelPos * 3);
+  } else {
+    wheelPos -= 170;
+    return CRGB(0, wheelPos * 3, 255 - wheelPos * 3);
+  }
+}
+
+void Effects::rainbowCycle(int speedDelay) {
+
+  if (millis() - rainbowState.lastUpdate > speedDelay) {
+    for (size_t stripIndex = 0; stripIndex < strips.size(); stripIndex++) {
+      int numLeds = strips[stripIndex]->getNumTotalLeds();
+      CRGB *stripLeds = strips[stripIndex]->getLeds();
+
+      for (int i = 0; i < numLeds; i++) {
+        uint8_t wheelPos =
+            ((i * 256 / numLeds) + rainbowState.phaseOffset) & 255;
+        stripLeds[i] = wheel(wheelPos);
+      }
+    }
+
+    showAllStrips();
+    rainbowState.phaseOffset++;
+    rainbowState.lastUpdate = millis();
+  }
+}
+
+void Effects::rainbowCycle() { rainbowCycle(20); }
