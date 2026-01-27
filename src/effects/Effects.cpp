@@ -13,6 +13,10 @@ void Effects::showAllStrips() {
   }
 }
 
+void Effects::setColor(CRGB color) { this->currentColor = color; }
+
+CRGB Effects::getCurrentColor() { return this->currentColor; }
+
 // Basic LED control methods
 void Effects::setLedColor(const CRGB &color, int stripIndex, int pos) {
   if (stripIndex >= 0 && stripIndex < strips.size()) {
@@ -29,26 +33,6 @@ void Effects::fillStrip(const CRGB &color, int stripIndex) {
 void Effects::fillAllStrips(const CRGB &color) {
   for (auto &strip : strips) {
     strip->fill(color);
-  }
-}
-
-void Effects::fillSegment(const CRGB &color, int stripIndex, Segment segment) {
-  if (stripIndex >= 0 && stripIndex < strips.size()) {
-    int endPos = segment.start + segment.length;
-    int numLeds = strips[stripIndex]->getNumTotalLeds();
-
-    // Ensure segment doesn't exceed strip bounds
-    if (segment.start < 0 || segment.start >= numLeds) {
-      return;
-    }
-    if (endPos > numLeds) {
-      endPos = numLeds;
-    }
-
-    // Fill the segment one LED at a time
-    for (int i = segment.start; i < endPos; i++) {
-      strips[stripIndex]->setLedColor(color, i);
-    }
   }
 }
 
@@ -91,7 +75,8 @@ void Effects::blink(const CRGB &color, const CRGB &color2) {
 }
 
 // ColorWipe effects implementation
-void Effects::colorWipe(const CRGB &color, const CRGB &color2, int time) {
+void Effects::colorWipe(const CRGB &color, const CRGB &color2, int time,
+                        bool isReversed) {
   if (millis() - lastUpdate >= time) {
     lastUpdate = millis();
 
@@ -99,7 +84,11 @@ void Effects::colorWipe(const CRGB &color, const CRGB &color2, int time) {
       int maxLeds = strip->getNumTotalLeds();
       if (state.currentLed < maxLeds) {
         CRGB ledColor = state.isOn ? color : color2;
-        strip->setLedColor(ledColor, state.currentLed);
+        if (isReversed) {
+          strip->setLedColor(ledColor, maxLeds - 1 - state.currentLed);
+        } else {
+          strip->setLedColor(ledColor, state.currentLed);
+        }
       }
     }
 
@@ -124,11 +113,15 @@ void Effects::colorWipe(const CRGB &color, const CRGB &color2, int time) {
 }
 
 void Effects::colorWipe(const CRGB &color, int time) {
-  colorWipe(color, CRGB::Black, time);
+  colorWipe(color, CRGB::Black, time, false);
 }
 
 void Effects::colorWipe(const CRGB &color) {
-  colorWipe(color, CRGB::Black, 50);
+  colorWipe(color, CRGB::Black, 50, false);
+}
+
+void Effects::colorWipeReverse(const CRGB &color) {
+  colorWipe(color, CRGB::Black, 50, true);
 }
 
 // Cyclon helper methods
@@ -261,4 +254,19 @@ void Effects::snowSparkle(CRGB color, int sparkleDelay) {
   this->showAllStrips();
 
   delay(random(100, 1000));
+}
+
+EffectsEnum Effects::getCurrentEffect() { return this->currentEffect; }
+
+int Effects::setCurrentEffect(String effectStr) {
+
+  EffectsEnum effect = fromString(effectStr);
+
+  if (effect == static_cast<EffectsEnum>(-1)) {
+    return -1; // TODO:  Better error message | throw exception
+  }
+
+  this->currentEffect = effect;
+
+  return 0;
 }

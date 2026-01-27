@@ -1,19 +1,16 @@
 #pragma once
 #include "../led_strip/LedStrip.h"
+#include "EffectsEnum.h"
 #include <cstdint>
 #include <memory>
 #include <vector>
-
-// Forward declaration for Segment struct
-struct Segment {
-  int start;
-  int length;
-};
 
 class Effects {
 private:
   std::vector<std::unique_ptr<ILedStrip>> strips;
   unsigned long lastUpdate = 0;
+  EffectsEnum currentEffect;
+  CRGB currentColor;
 
   // Shared effect state for synchronized effects
   struct EffectState {
@@ -47,10 +44,10 @@ public:
   void showAllStrips();
 
   // Basic effects (apply to all strips)
+  void setColor(CRGB color);
   void setLedColor(const CRGB &color, int stripIndex, int pos);
   void fillStrip(const CRGB &color, int stripIndex);
   void fillAllStrips(const CRGB &color);
-  void fillSegment(const CRGB &color, int stripIndex, Segment segment);
 
   // Blink effects
   void blink(const CRGB &color, const CRGB &color2, int time);
@@ -58,9 +55,13 @@ public:
   void blink(const CRGB &color, const CRGB &color2);
 
   // ColorWipe effects
-  void colorWipe(const CRGB &color, const CRGB &color2, int time);
+  void colorWipe(const CRGB &color, const CRGB &color2, int time,
+                 bool isReverse);
   void colorWipe(const CRGB &color, int time);
   void colorWipe(const CRGB &color);
+
+  // ColorWipeReverse effects
+  void colorWipeReverse(const CRGB &color);
   void cyclonUpdatePosition();
   void fadeAllGlobal();
 
@@ -79,6 +80,9 @@ public:
   void setLastUpdate(unsigned long newUpdate);
   int getStripCount() const;
   int getStripLedCount(int stripIndex) const;
+  EffectsEnum getCurrentEffect();
+  CRGB getCurrentColor();
+  int setCurrentEffect(String effectStr);
 };
 
 // Include template implementations
