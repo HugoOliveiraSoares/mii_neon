@@ -36,7 +36,15 @@ void Effects::fillAllStrips(const CRGB &color) {
   }
 }
 
-// Getters
+void Effects::setBrightness(int bright) {
+  this->currentBright = bright;
+  for (auto &strip : strips) {
+    strip->setBrightness(bright);
+  }
+}
+
+int Effects::getBrightness() { return this->currentBright; }
+
 unsigned long Effects::getLastUpdate() const { return this->lastUpdate; }
 
 void Effects::setLastUpdate(unsigned long newUpdate) {

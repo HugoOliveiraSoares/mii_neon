@@ -11,6 +11,7 @@ private:
   unsigned long lastUpdate = 0;
   EffectsEnum currentEffect;
   CRGB currentColor;
+  int currentBright;
 
   // Shared effect state for synchronized effects
   struct EffectState {
@@ -46,6 +47,8 @@ public:
   // Basic effects (apply to all strips)
   void setColor(CRGB color);
   void setLedColor(const CRGB &color, int stripIndex, int pos);
+  void setBrightness(int bright);
+  int getBrightness();
   void fillStrip(const CRGB &color, int stripIndex);
   void fillAllStrips(const CRGB &color);
 

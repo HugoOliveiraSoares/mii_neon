@@ -1,21 +1,22 @@
 #pragma once
 #include <FastLED.h>
 #include <cstdint>
-#include <vector>
 #include <memory>
+#include <vector>
 
 // Abstract interface for LED strip operations
 class ILedStrip {
 public:
-    virtual ~ILedStrip() = default;
-    virtual void init() = 0;
-    virtual void setLedColor(const CRGB &color, int pos) = 0;
-    virtual void fill(const CRGB &color) = 0;
-    virtual void fill(const CRGB &color, int length) = 0;
-    virtual int getNumTotalLeds() const = 0;
-    virtual CRGB getCurrentColor() const = 0;
-    virtual void show() = 0;
-    virtual CRGB* getLeds() = 0;
+  virtual ~ILedStrip() = default;
+  virtual void init() = 0;
+  virtual void setLedColor(const CRGB &color, int pos) = 0;
+  virtual void setBrightness(int bright) = 0;
+  virtual void fill(const CRGB &color) = 0;
+  virtual void fill(const CRGB &color, int length) = 0;
+  virtual int getNumTotalLeds() const = 0;
+  virtual CRGB getCurrentColor() const = 0;
+  virtual void show() = 0;
+  virtual CRGB *getLeds() = 0;
 };
 
 template <uint8_t DATA_PIN> class LedStrip : public ILedStrip {
@@ -24,13 +25,14 @@ public:
 
   void init();
   void setLedColor(const CRGB &color, int pos);
+  void setBrightness(int bright);
   void fill(const CRGB &color);
   void fill(const CRGB &color, int length);
 
   int getNumTotalLeds() const;
   CRGB getCurrentColor() const;
   void show();
-  CRGB* getLeds();
+  CRGB *getLeds();
 
 private:
   std::vector<CRGB> leds;
@@ -63,6 +65,10 @@ void LedStrip<DATA_PIN>::setLedColor(const CRGB &color, int pos) {
   currentColor = color;
 }
 
+template <uint8_t DATA_PIN> void LedStrip<DATA_PIN>::setBrightness(int bright) {
+  FastLED.setBrightness(bright);
+}
+
 template <uint8_t DATA_PIN> void LedStrip<DATA_PIN>::fill(const CRGB &color) {
   fill(color, numTotalLeds);
 }
@@ -86,10 +92,8 @@ template <uint8_t DATA_PIN> CRGB LedStrip<DATA_PIN>::getCurrentColor() const {
   return currentColor;
 }
 
-template <uint8_t DATA_PIN> void LedStrip<DATA_PIN>::show() {
-  FastLED.show();
-}
+template <uint8_t DATA_PIN> void LedStrip<DATA_PIN>::show() { FastLED.show(); }
 
-template <uint8_t DATA_PIN> CRGB* LedStrip<DATA_PIN>::getLeds() {
+template <uint8_t DATA_PIN> CRGB *LedStrip<DATA_PIN>::getLeds() {
   return leds.data();
 }
