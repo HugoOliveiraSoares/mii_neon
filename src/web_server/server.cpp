@@ -1,6 +1,6 @@
 #include "server.h"
 
-extern LedService ledService;
+extern Effects effects;
 
 String WebServer::wifiStatus = "idle";
 
@@ -31,14 +31,14 @@ void WebServer::begin() {
         int g = doc["rgb"]["g"];
         int b = doc["rgb"]["b"];
 
-        ledService.setColor(CRGB(r, g, b));
+        effects.setColor(CRGB(r, g, b));
 
         request->send(200, "application/json",
                       "{\"response\":\"Color set successfully\"}");
       });
 
   server.on("/color", HTTP_GET, [](AsyncWebServerRequest *request) {
-    CRGB currentColor = ledService.getCurrentColor();
+    CRGB currentColor = effects.getCurrentColor();
 
     Serial.print("Get current Color: ");
     Serial.print("R: ");
@@ -80,14 +80,14 @@ void WebServer::begin() {
         }
 
         int bright = doc["bright"];
-        ledService.setBright(bright);
+        effects.setBrightness(bright);
 
         request->send(200, "application/json",
                       "{\"response\":\"Bright set successfully\"}");
       });
 
   server.on("/bright", HTTP_GET, [](AsyncWebServerRequest *request) {
-    int currentBright = ledService.getCurrentBright();
+    int currentBright = effects.getBrightness();
 
     StaticJsonDocument<128> doc;
     doc["bright"] = currentBright;
@@ -97,8 +97,19 @@ void WebServer::begin() {
     request->send(200, "application/json", response);
   });
 
+  server.on("/effect", HTTP_GET, [](AsyncWebServerRequest *request) {
+    EffectsEnum currentEffect = effects.getCurrentEffect();
+
+    StaticJsonDocument<128> doc;
+    doc["current_effect"] = toString(currentEffect);
+
+    String response;
+    serializeJson(doc, response);
+    request->send(200, "application/json", response);
+  });
+
   server.on(
-      "/effects", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
+      "/effect", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
       [](AsyncWebServerRequest *request, uint8_t *data, size_t len,
          std::size_t index, std::size_t total) {
         StaticJsonDocument<200> jsonDoc;
@@ -117,7 +128,7 @@ void WebServer::begin() {
         }
 
         String effect = jsonDoc["effect"];
-        int r = ledService.setMode(effect);
+        int r = effects.setCurrentEffect(effect);
         if (r == -1) {
           request->send(400, "application/json",
                         "{\"error\":\"Invalid Effect name\"}");
