@@ -1,11 +1,9 @@
 #include "FastLED.h"
 #include "effects/Effects.h"
 #include "effects/EffectsEnum.h"
-#include "led_service/LedService.h"
 #include "web_server/server.h"
 #include <Arduino.h>
 #include <ESP8266mDNS.h>
-#include <cstdlib>
 
 #define WIFI_CONFIG_FILE "/wifi.json"
 #define AP_SSID ""
@@ -14,9 +12,6 @@
 WebServer webServer;
 
 Effects effects;
-LedService ledService;
-
-Segment seg1 = {0, NUM_TOTAL_LEDS};
 
 unsigned long lastScanTime = 0;
 const unsigned long scanInterval = 10000; // 10 segundos
@@ -92,47 +87,46 @@ void setup() {
   webServer.begin();
   MDNS.addService("http", "tcp", 80);
 
-  effects.init();
+  effects.addStrip<2>(6);
+  effects.initAllStrips();
 
-  ledService.setBright(128);
-  ledService.setColor(CRGB(253, 96, 164));
-  effects.fill(ledService.getCurrentColor());
+  effects.fillAllStrips(CRGB::Blue);
+  effects.showAllStrips();
 
   delay(100);
 }
 
 void loop() {
   MDNS.update();
-
   delay(0);
 
-  switch (ledService.getCurrentEffect()) {
+  switch (effects.getCurrentEffect()) {
   case Mii:
-    effects.fill(ledService.getCurrentColor());
+    effects.fillAllStrips(CRGB::Pink);
     break;
   case Estatico:
-    if (ledService.getCurrentColor() == NULL) {
-      ledService.setColor(CRGB(253, 96, 164));
+    if (effects.getCurrentColor() == NULL) {
+      effects.setColor(CRGB(253, 96, 164));
     }
-    effects.fill(ledService.getCurrentColor());
+    effects.fillAllStrips(effects.getCurrentColor());
     break;
   case Blink:
-    effects.blink(ledService.getCurrentColor());
-    break;
-  case Pacifica:
-    effects.pacifica_loop();
+    if (effects.getCurrentColor() == NULL) {
+      effects.setColor(CRGB(253, 96, 164));
+    }
+    effects.blink(effects.getCurrentColor());
     break;
   case Cyclon:
     effects.cyclon();
     break;
   case ColorWipe:
-    effects.colorWipe(ledService.getCurrentColor());
+    effects.colorWipe(CRGB::Green);
     break;
-  case ColorWipeInverse:
-    effects.colorWipe(ledService.getCurrentColor());
+  case ColorWipeReverse:
+    effects.colorWipeReverse(CRGB::Green);
     break;
   case SnowSparkle:
-    effects.snowSparkle(ledService.getCurrentColor());
+    effects.snowSparkle(CRGB::Cyan, 15);
     break;
   case Rainbow:
     effects.rainbowCycle();
@@ -141,5 +135,5 @@ void loop() {
     break;
   }
 
-  FastLED.show();
+  effects.showAllStrips();
 }
