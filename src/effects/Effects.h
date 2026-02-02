@@ -11,7 +11,7 @@ private:
   unsigned long lastUpdate = 0;
   EffectsEnum currentEffect;
   CRGB currentColor;
-  int currentBright;
+  int currentBright = 200;
 
   struct EffectState {
     bool isOn = true;

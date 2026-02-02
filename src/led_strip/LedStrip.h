@@ -52,7 +52,7 @@ template <uint8_t DATA_PIN> void LedStrip<DATA_PIN>::init() {
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds.data(), numTotalLeds)
       .setCorrection(TypicalLEDStrip);
 
-  FastLED.setBrightness(20);
+  FastLED.setBrightness(200);
   FastLED.clear();
 }
 
