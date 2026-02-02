@@ -1,8 +1,55 @@
 #include "server.h"
+#include "../effects/EffectErrorCodes.h"
 
 extern Effects effects;
 
 String WebServer::wifiStatus = "idle";
+
+String buildErrorResponse(const String &type, const String &message,
+                          int statusCode, const String &details = "",
+                          const String &invalidEffect = "") {
+  StaticJsonDocument<768> doc;
+
+  JsonObject error = doc.createNestedObject("error");
+  error["type"] = type;
+  error["message"] = message;
+  error["status_code"] = statusCode;
+  error["path"] = "/effect";
+
+  if (!invalidEffect.isEmpty()) {
+    JsonObject detailsObj = error.createNestedObject("details");
+    detailsObj["invalid_effect"] = invalidEffect;
+
+    // Generate available effects array from EffectsEnum
+    JsonArray effectsArray = detailsObj.createNestedArray("available_effects");
+    for (int i = 0; i < EFFECTS_COUNT; i++) {
+      EffectsEnum effect = static_cast<EffectsEnum>(i);
+      effectsArray.add(toString(effect));
+    }
+  }
+
+  if (!details.isEmpty() && invalidEffect.isEmpty()) {
+    error["details"] = details;
+  }
+
+  String response;
+  serializeJson(doc, response);
+  return response;
+}
+
+// Helper function to log errors
+void logError(const String &type, const String &message,
+              const String &context = "") {
+#ifdef DEV_ENV
+  if (!context.isEmpty()) {
+    Serial.println("[CONTEXT] " + context);
+  }
+  Serial.println("[ENDPOINT] /effect (POST)");
+  Serial.println("----------------------------------------");
+#else
+  Serial.println("[ERROR] " + type + ": " + message);
+#endif
+}
 
 WebServer::WebServer() : server(80) {}
 void WebServer::begin() {
@@ -128,14 +175,42 @@ void WebServer::begin() {
         }
 
         String effect = jsonDoc["effect"];
-        int r = effects.setCurrentEffect(effect);
-        if (r == -1) {
-          request->send(400, "application/json",
-                        "{\"error\":\"Invalid Effect name\"}");
-        }
 
-        request->send(200, "application/json",
-                      "{\"response\":\"Effect set successfully\"}");
+        // Use error code checking instead of exceptions to avoid ESP8266
+        // crashes
+        int result = effects.setCurrentEffect(effect);
+
+        if (result == EFFECT_SUCCESS) {
+          // Success response with timestamp
+          StaticJsonDocument<256> successDoc;
+          successDoc["response"] = "Effect set successfully";
+          successDoc["effect"] = effect;
+
+          String successResponse;
+          serializeJson(successDoc, successResponse);
+          request->send(200, "application/json", successResponse);
+
+        } else if (result == EFFECT_INVALID_NAME) {
+          // Handle invalid effect with RESTful response
+          logError("InvalidEffect", ERROR_INVALID_NAME_STR,
+                   "Effect: " + effect);
+
+          String errorResponse =
+              buildErrorResponse("InvalidEffectException",
+                                 ERROR_INVALID_NAME_STR, 400, "", effect);
+
+          request->send(400, "application/json", errorResponse);
+
+        } else {
+          // Handle any other unexpected errors
+          logError("UnknownError", "Unknown error occurred",
+                   "Effect: " + effect);
+
+          String errorResponse = buildErrorResponse(
+              "UnknownError", "An unknown error occurred", 500);
+
+          request->send(500, "application/json", errorResponse);
+        }
       });
 
   server.on(
