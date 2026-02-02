@@ -1,4 +1,7 @@
 #include "Effects.h"
+#include "EffectErrorCodes.h"
+#include "EffectsEnum.h"
+#include <Arduino.h>
 
 // Strip management methods
 void Effects::initAllStrips() {
@@ -270,8 +273,19 @@ int Effects::setCurrentEffect(String effectStr) {
 
   EffectsEnum effect = fromString(effectStr);
 
-  if (effect == static_cast<EffectsEnum>(-1)) {
-    return -1; // TODO:  Better error message | throw exception
+  if (effect == static_cast<EffectsEnum>(EFFECT_INVALID_NAME)) {
+#ifdef DEV_ENV
+    Serial.println("[ERROR] " + String(ERROR_INVALID_NAME_STR) + ": " +
+                   effectStr);
+    Serial.println("[INFO] Available effects:");
+    for (int i = 0; i < EFFECTS_COUNT; i++) {
+      EffectsEnum effect = static_cast<EffectsEnum>(i);
+      Serial.println("  - " + String(toString(effect)));
+    }
+#endif
+
+    // Return error code instead of throwing exception to avoid ESP8266 crashes
+    return EFFECT_INVALID_NAME;
   }
 
   this->currentEffect = effect;
