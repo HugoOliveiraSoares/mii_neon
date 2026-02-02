@@ -44,7 +44,7 @@ public:
   void setColor(CRGB color);
   CRGB getCurrentColor();
 
-  void setBrightness(int bright);
+  int setBrightness(int bright);
   int getBrightness();
 
   unsigned long getLastUpdate() const;
