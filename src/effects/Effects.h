@@ -1,59 +1,86 @@
 #pragma once
-#include "FastLED.h"
+#include "../led_strip/LedStrip.h"
+#include "EffectsEnum.h"
 #include <cstdint>
-
-#define NUM_TOTAL_LEDS 10
-
-#define MAX_POWER_MILLIAMPS 500
-
-struct Segment {
-  int start;
-  int length;
-};
+#include <memory>
+#include <vector>
 
 class Effects {
+private:
+  std::vector<std::unique_ptr<ILedStrip>> strips;
+  unsigned long lastUpdate = 0;
+  EffectsEnum currentEffect;
+  CRGB currentColor;
+  int currentBright = 200;
+
+  struct EffectState {
+    bool isOn = true;
+    int currentLed = 0;
+    bool direction = true;
+    int currentHue = 0;
+  };
+  EffectState state;
+
+  struct CyclonState {
+    int currentLed = 0;
+    bool direction = true;
+    int hue = 0;
+    static const int UPDATE_INTERVAL = 10; // 10ms timing
+  };
+  CyclonState cyclonState;
+
+  struct RainbowCycleState {
+    uint16_t phaseOffset = 0;
+    unsigned long lastUpdate = 0;
+  };
+  RainbowCycleState rainbowState;
+
 public:
-  Effects();
-  void init();
-  void setLedColor(CRGB color, int pos);
-  void fill(CRGB color);
-  void fill(CRGB color, int length);
-  void fillSegment(CRGB color, Segment segment);
-  void blink(CRGB color, CRGB color2, int time);
-  void blink(CRGB color);
-  void blink(CRGB color, CRGB color2);
-  void pacifica_loop();
-  void cyclon();
-  void colorWipe(CRGB color, CRGB color2, int time);
-  void colorWipe(CRGB color, int time);
-  void colorWipe(CRGB color);
-  void snowSparkle(CRGB color, int sparkleDelay, int speedDelay);
-  void snowSparkle(CRGB color);
-  void rainbowCycle();
-  void rainbowCycle(int speedDelay);
-  unsigned long getLastUpdate();
+  template <uint8_t PIN> void addStrip(int numLeds);
+
+  void initAllStrips();
+  void showAllStrips();
+
+  void setColor(CRGB color);
+  CRGB getCurrentColor();
+
+  int setBrightness(int bright);
+  int getBrightness();
+
+  unsigned long getLastUpdate() const;
   void setLastUpdate(unsigned long newUpdate);
 
-private:
-  CRGB leds[NUM_TOTAL_LEDS];
-  CRGBPalette16 pacifica_palette_1 = {0x000507, 0x000409, 0x00030B, 0x00030D,
-                                      0x000210, 0x000212, 0x000114, 0x000117,
-                                      0x000019, 0x00001C, 0x000026, 0x000031,
-                                      0x00003B, 0x000046, 0x14554B, 0x28AA50};
-  CRGBPalette16 pacifica_palette_2 = {0x000507, 0x000409, 0x00030B, 0x00030D,
-                                      0x000210, 0x000212, 0x000114, 0x000117,
-                                      0x000019, 0x00001C, 0x000026, 0x000031,
-                                      0x00003B, 0x000046, 0x0C5F52, 0x19BE5F};
-  CRGBPalette16 pacifica_palette_3 = {0x000208, 0x00030E, 0x000514, 0x00061A,
-                                      0x000820, 0x000927, 0x000B2D, 0x000C33,
-                                      0x000E39, 0x001040, 0x001450, 0x001860,
-                                      0x001C70, 0x002080, 0x1040BF, 0x2060FF};
-  void pacifica_one_layer(CRGBPalette16 &p, uint16_t cistart,
-                          uint16_t wavescale, uint8_t bri, uint16_t ioff);
-  void pacifica_add_whitecaps();
-  void pacifica_deepen_colors();
-  void fadeall();
-  uint8_t *wheel(uint8_t wheelPos);
-  unsigned long lastUpdate = 0;
-  int currentLed = 0;
+  int getStripCount() const;
+  int getStripLedCount(int stripIndex) const;
+
+  EffectsEnum getCurrentEffect();
+  int setCurrentEffect(String effectStr);
+
+  void setLedColor(const CRGB &color, int stripIndex, int pos);
+  void fillStrip(const CRGB &color, int stripIndex);
+  void fillAllStrips(const CRGB &color);
+
+  void blink(const CRGB &color, const CRGB &color2, int time);
+  void blink(const CRGB &color);
+  void blink(const CRGB &color, const CRGB &color2);
+
+  void colorWipe(const CRGB &color, const CRGB &color2, int time,
+                 bool isReverse);
+  void colorWipe(const CRGB &color, int time);
+  void colorWipe(const CRGB &color);
+  void colorWipeReverse(const CRGB &color);
+
+  void cyclonUpdatePosition();
+
+  void fadeAllGlobal();
+
+  void cyclon();
+
+  void rainbowCycle(int speedDelay);
+  void rainbowCycle();
+
+  void snowSparkle(CRGB color);
+  void snowSparkle(CRGB color, int sparkleDelay);
 };
+
+#include "Effects.tpp"

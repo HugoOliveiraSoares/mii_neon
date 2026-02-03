@@ -1,8 +1,64 @@
 #include "server.h"
+#include "../effects/EffectErrorCodes.h"
 
-extern LedService ledService;
+extern Effects effects;
 
 String WebServer::wifiStatus = "idle";
+
+String buildErrorResponse(const String &type, const String &message,
+                          int statusCode, const String &path = "") {
+  StaticJsonDocument<768> doc;
+
+  JsonObject error = doc.createNestedObject("error");
+  error["type"] = type;
+  error["message"] = message;
+  error["status_code"] = statusCode;
+  error["path"] = path;
+
+  String response;
+  serializeJson(doc, response);
+  return response;
+}
+
+// Helper function to build effect-specific error response with details
+String buildEffectErrorResponse(const String &type, const String &message,
+                                const String &invalidEffect) {
+  StaticJsonDocument<768> doc;
+
+  JsonObject error = doc.createNestedObject("error");
+  error["type"] = type;
+  error["message"] = message;
+  error["status_code"] = 400;
+  error["path"] = "/effect";
+
+  JsonObject detailsObj = error.createNestedObject("details");
+  detailsObj["invalid_effect"] = invalidEffect;
+
+  // Generate available effects array from EffectsEnum
+  JsonArray effectsArray = detailsObj.createNestedArray("available_effects");
+  for (int i = 0; i < EFFECTS_COUNT; i++) {
+    EffectsEnum effect = static_cast<EffectsEnum>(i);
+    effectsArray.add(toString(effect));
+  }
+
+  String response;
+  serializeJson(doc, response);
+  return response;
+}
+
+// Helper function to log errors
+void logError(const String &type, const String &message,
+              const String &context = "") {
+#ifdef DEV_ENV
+  if (!context.isEmpty()) {
+    Serial.println("[CONTEXT] " + context);
+  }
+  Serial.println("[ENDPOINT] /effect (POST)");
+  Serial.println("----------------------------------------");
+#else
+  Serial.println("[ERROR] " + type + ": " + message);
+#endif
+}
 
 WebServer::WebServer() : server(80) {}
 void WebServer::begin() {
@@ -31,14 +87,14 @@ void WebServer::begin() {
         int g = doc["rgb"]["g"];
         int b = doc["rgb"]["b"];
 
-        ledService.setColor(CRGB(r, g, b));
+        effects.setColor(CRGB(r, g, b));
 
         request->send(200, "application/json",
                       "{\"response\":\"Color set successfully\"}");
       });
 
   server.on("/color", HTTP_GET, [](AsyncWebServerRequest *request) {
-    CRGB currentColor = ledService.getCurrentColor();
+    CRGB currentColor = effects.getCurrentColor();
 
     Serial.print("Get current Color: ");
     Serial.print("R: ");
@@ -68,26 +124,43 @@ void WebServer::begin() {
         DeserializationError error = deserializeJson(doc, data, len);
 
         if (error) {
-          request->send(400, "application/json",
-                        "{\"error\":\"Invalid JSON\"}");
+          String errorResponse = buildErrorResponse(
+              "JsonParseError", ERROR_BRIGHTNESS_INVALID_JSON_STR, 400,
+              "/bright");
+          request->send(400, "application/json", errorResponse);
           return;
         }
 
         if (!doc.containsKey("bright")) {
-          request->send(400, "application/json",
-                        "{\"error\":\"Missing bright object\"}");
+          String errorResponse = buildErrorResponse(
+              "ValidationError", ERROR_BRIGHTNESS_MISSING_STR, 400, "/bright");
+          request->send(400, "application/json", errorResponse);
           return;
         }
 
         int bright = doc["bright"];
-        ledService.setBright(bright);
+        int result = effects.setBrightness(bright);
 
-        request->send(200, "application/json",
-                      "{\"response\":\"Bright set successfully\"}");
+        if (result == BRIGHTNESS_SUCCESS) {
+          StaticJsonDocument<128> successDoc;
+          successDoc["brightness"] = bright;
+
+          String successResponse;
+          serializeJson(successDoc, successResponse);
+          request->send(200, "application/json", successResponse);
+        } else if (result == BRIGHTNESS_OUT_OF_RANGE) {
+          String errorResponse = buildErrorResponse(
+              "RangeError", ERROR_BRIGHTNESS_RANGE_STR, 400, "/bright");
+          request->send(400, "application/json", errorResponse);
+        } else {
+          String errorResponse = buildErrorResponse(
+              "UnknownError", "An unknown error occurred", 500, "/bright");
+          request->send(500, "application/json", errorResponse);
+        }
       });
 
   server.on("/bright", HTTP_GET, [](AsyncWebServerRequest *request) {
-    int currentBright = ledService.getCurrentBright();
+    int currentBright = effects.getBrightness();
 
     StaticJsonDocument<128> doc;
     doc["bright"] = currentBright;
@@ -97,24 +170,19 @@ void WebServer::begin() {
     request->send(200, "application/json", response);
   });
 
-  server.on("/effects", HTTP_GET, [](AsyncWebServerRequest *request) {
-    std::vector<String> effectsList = ledService.getModes();
+  server.on("/effect", HTTP_GET, [](AsyncWebServerRequest *request) {
+    EffectsEnum currentEffect = effects.getCurrentEffect();
 
-    DynamicJsonDocument jsonDoc(JSON_ARRAY_SIZE(effectsList.size()) +
-                                JSON_OBJECT_SIZE(1) + 200);
-    JsonArray effectsArray = jsonDoc.createNestedArray("effects");
-
-    for (const String &effectName : effectsList) {
-      effectsArray.add(effectName);
-    }
+    StaticJsonDocument<128> doc;
+    doc["current_effect"] = toString(currentEffect);
 
     String response;
-    serializeJson(jsonDoc, response);
+    serializeJson(doc, response);
     request->send(200, "application/json", response);
   });
 
   server.on(
-      "/effects", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
+      "/effect", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
       [](AsyncWebServerRequest *request, uint8_t *data, size_t len,
          std::size_t index, std::size_t total) {
         StaticJsonDocument<200> jsonDoc;
@@ -133,14 +201,40 @@ void WebServer::begin() {
         }
 
         String effect = jsonDoc["effect"];
-        int r = ledService.setMode(effect);
-        if (r == -1) {
-          request->send(400, "application/json",
-                        "{\"error\":\"Invalid Effect name\"}");
-        }
 
-        request->send(200, "application/json",
-                      "{\"response\":\"Effect set successfully\"}");
+        // Use error code checking instead of exceptions to avoid ESP8266
+        // crashes
+        int result = effects.setCurrentEffect(effect);
+
+        if (result == EFFECT_SUCCESS) {
+          // Success response
+          StaticJsonDocument<256> successDoc;
+          successDoc["effect"] = effect;
+
+          String successResponse;
+          serializeJson(successDoc, successResponse);
+          request->send(200, "application/json", successResponse);
+
+        } else if (result == EFFECT_INVALID_NAME) {
+          // Handle invalid effect with RESTful response
+          logError("InvalidEffect", ERROR_INVALID_NAME_STR,
+                   "Effect: " + effect);
+
+          String errorResponse = buildEffectErrorResponse(
+              "InvalidEffectException", ERROR_INVALID_NAME_STR, effect);
+
+          request->send(400, "application/json", errorResponse);
+
+        } else {
+          // Handle any other unexpected errors
+          logError("UnknownError", "Unknown error occurred",
+                   "Effect: " + effect);
+
+          String errorResponse = buildErrorResponse(
+              "UnknownError", "An unknown error occurred", 500, "/effect");
+
+          request->send(500, "application/json", errorResponse);
+        }
       });
 
   server.on(
