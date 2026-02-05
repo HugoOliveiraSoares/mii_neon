@@ -84,4 +84,6 @@ public:
 
   void snowSparkle(CRGB color);
   void snowSparkle(CRGB color, int sparkleDelay);
+
+  void miiEffect();
 };

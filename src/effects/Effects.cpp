@@ -273,6 +273,52 @@ void Effects::snowSparkle(CRGB color, int sparkleDelay) {
   delay(random(100, 1000));
 }
 
+/*
+ *
+ * Mii Effect - Different colors for different strips
+ *
+ */
+
+void Effects::miiEffect() {
+  // Define colors for Mii effect
+  const CRGB COLOR_PINK = CRGB(255, 0, 255);
+  const CRGB COLOR_CYAN = CRGB(0, 0, 255);
+  const CRGB COLOR_GRAY = CRGB::White;
+
+  // Strip 0 (Pin 13) -> COLOR_PINK
+  // Strip 1 (Pin 14) -> COLOR_PINK
+  // Strip 2 (Pin 16) -> COLOR_PINK
+  // Strip 3 (Pin 17) -> COLOR_CYAN
+  // Strip 4 (Pin 18) -> COLOR_CYAN
+  // Strip 5 (Pin 19) -> COLOR_GRAY
+  // Strip 6 (Pin 21) -> COLOR_PINK
+  // Strip 7 (Pin 22) -> COLOR_GRAY
+  // Strip 8 (Pin 23) -> COLOR_GRAY
+  // Strip 9 (Pin 25) -> COLOR_GRAY
+  // Strip 10 (Pin 26) -> COLOR_PINK
+  // Strip 11 (Pin 27) -> COLOR_GRAY
+
+  CRGB stripColors[] = {
+      COLOR_PINK, // Pin 13
+      COLOR_PINK, // Pin 14
+      COLOR_PINK, // Pin 16
+      COLOR_CYAN, // Pin 17
+      COLOR_CYAN, // Pin 18
+      COLOR_GRAY, // Pin 19
+      COLOR_PINK, // Pin 21
+      COLOR_GRAY, // Pin 22
+      COLOR_GRAY, // Pin 23
+      COLOR_GRAY, // Pin 25
+      COLOR_PINK, // Pin 26
+      COLOR_GRAY  // Pin 27
+  };
+
+  // Apply colors to each strip
+  for (size_t i = 0; i < strips.size() && i < 12; i++) {
+    fillStrip(stripColors[i], i);
+  }
+}
+
 EffectsEnum Effects::getCurrentEffect() { return this->currentEffect; }
 
 int Effects::setCurrentEffect(String effectStr) {

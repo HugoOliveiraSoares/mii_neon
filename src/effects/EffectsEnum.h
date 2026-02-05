@@ -38,6 +38,8 @@ inline const char *toString(EffectsEnum effect) {
 }
 
 inline EffectsEnum fromString(const String &effectName) {
+  if (effectName == "Mii")
+    return Mii;
   if (effectName == "Estatico")
     return Estatico;
   if (effectName == "Blink")
