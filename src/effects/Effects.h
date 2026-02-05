@@ -36,7 +36,10 @@ private:
   RainbowCycleState rainbowState;
 
 public:
-  template <uint8_t PIN> void addStrip(int numLeds);
+  template <uint8_t PIN> void addStrip(int numLeds) {
+    auto strip = std::unique_ptr<LedStrip<PIN>>(new LedStrip<PIN>(numLeds));
+    strips.push_back(std::move(strip));
+  }
 
   void initAllStrips();
   void showAllStrips();
@@ -82,5 +85,3 @@ public:
   void snowSparkle(CRGB color);
   void snowSparkle(CRGB color, int sparkleDelay);
 };
-
-#include "Effects.tpp"

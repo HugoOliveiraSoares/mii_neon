@@ -3,7 +3,8 @@
 #include "effects/EffectsEnum.h"
 #include "web_server/server.h"
 #include <Arduino.h>
-#include <ESP8266mDNS.h>
+#include <ESPmDNS.h>
+#include <WiFi.h>
 
 #define WIFI_CONFIG_FILE "/wifi.json"
 #define AP_SSID ""
@@ -87,7 +88,18 @@ void setup() {
   webServer.begin();
   MDNS.addService("http", "tcp", 80);
 
-  effects.addStrip<2>(6);
+  effects.addStrip<13>(2);  // I
+  effects.addStrip<14>(2);  // i
+  effects.addStrip<16>(9);  // M
+  effects.addStrip<17>(4);  // V
+  effects.addStrip<18>(27); // Contorno
+  effects.addStrip<19>(5);  // Bigode D
+  effects.addStrip<21>(5);  //  ( cima
+  effects.addStrip<22>(8);  // W
+  effects.addStrip<23>(5);  // Orelha D
+  effects.addStrip<25>(5);  // Orelha E
+  effects.addStrip<26>(7);  // ) baixo
+  effects.addStrip<27>(5);  // Bigode E
   effects.initAllStrips();
 
   effects.fillAllStrips(CRGB::Blue);
@@ -97,8 +109,6 @@ void setup() {
 }
 
 void loop() {
-  MDNS.update();
-  delay(0);
 
   switch (effects.getCurrentEffect()) {
   case Mii:

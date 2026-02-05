@@ -2,9 +2,12 @@
 
 #include "../effects/Effects.h"
 #include <ArduinoJson.h>
+#include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
 #include <Ticker.h>
+#include <Update.h>
+#include <WiFi.h>
 #include <vector>
 
 class WebServer {

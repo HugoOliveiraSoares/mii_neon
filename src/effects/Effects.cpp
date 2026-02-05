@@ -43,12 +43,12 @@ int Effects::setBrightness(int bright) {
   if (bright < BRIGHTNESS_MIN_VALUE || bright > BRIGHTNESS_MAX_VALUE) {
     return BRIGHTNESS_OUT_OF_RANGE;
   }
-  
+
   this->currentBright = bright;
   for (auto &strip : strips) {
     strip->setBrightness(bright);
   }
-  
+
   return BRIGHTNESS_SUCCESS;
 }
 

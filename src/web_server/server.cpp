@@ -244,7 +244,7 @@ void WebServer::begin() {
           AsyncWebServerResponse *response = request->beginResponse(
               200, F("text/html"),
               Update.hasError()
-                  ? String(F("Update error: ")) + Update.getErrorString()
+                  ? String(F("Update error: ")) + Update.errorString()
                   : "Update aborted by server.");
           response->addHeader("Access-Control-Allow-Headers", "*");
           response->addHeader("Access-Control-Allow-Origin", "*");
@@ -458,10 +458,9 @@ bool WebServer::extractTar(File &tarFile) {
 }
 
 void WebServer::listFiles(const char *dirPath) {
-  Dir dir = LittleFS.openDir(dirPath);
-  while (dir.next()) {
-    Serial.printf("Arquivo: %s (%d bytes)\n", dir.fileName().c_str(),
-                  dir.fileSize());
+  File dir = LittleFS.open(dirPath);
+  while (dir.openNextFile()) {
+    Serial.printf("Arquivo: %s (%d bytes)\n", dir.name(), dir.size());
   }
 }
 
