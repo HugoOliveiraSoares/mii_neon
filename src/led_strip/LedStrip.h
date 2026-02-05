@@ -47,7 +47,7 @@ LedStrip<DATA_PIN>::LedStrip(int numTotalLeds)
 }
 
 template <uint8_t DATA_PIN> void LedStrip<DATA_PIN>::init() {
-  delay(500);
+  delay(10);
 
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds.data(), numTotalLeds)
       .setCorrection(TypicalLEDStrip);
