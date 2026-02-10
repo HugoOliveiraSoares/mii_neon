@@ -3,6 +3,7 @@ import {
     setupPasswordToggle,
     showMessage,
     showModal,
+    hideModal,
 } from "./ui.js";
 
 import { Api } from "./api.js";
@@ -94,10 +95,23 @@ function setupFirmwareUpdateForm(formId) {
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const formData = new FormData(form);
+        
+        // Show progress modal
+        showModal("updateProgressModal", "Atualizando firmware...");
+        
         try {
-            Api.firmwareUpdate(formData);
-        } catch (e) {
-            console.log("Erro ao enviar formulario");
+            const response = await Api.firmwareUpdate(formData);
+            
+            hideModal("updateProgressModal");
+            showUpdateSuccess("Firmware atualizado com sucesso!");
+            
+            // Setup countdown and redirect after 5 seconds
+            countdownRedirect(5, "/");
+            
+        } catch (error) {
+            console.error("Erro na atualização do firmware:", error);
+            hideModal("updateProgressModal");
+            showUpdateError(error.message);
         }
     });
 }
@@ -108,10 +122,63 @@ function setupFSUpdateForm(formId) {
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const formData = new FormData(form);
+        
+        // Show progress modal
+        showModal("updateProgressModal", "Atualizando arquivos do sistema...");
+        
         try {
-            Api.fileSystemUpdate(formData);
-        } catch (e) {
-            console.log("Erro ao enviar formulario");
+            const response = await Api.fileSystemUpdate(formData);
+            
+            hideModal("updateProgressModal");
+            showUpdateSuccess("Arquivos do sistema atualizados com sucesso!");
+            
+            // Setup countdown and redirect after 5 seconds
+            countdownRedirect(5, "/");
+            
+        } catch (error) {
+            console.error("Erro na atualização dos arquivos:", error);
+            hideModal("updateProgressModal");
+            showUpdateError(error.message);
         }
     });
+}
+
+// Helper functions for update modals
+function showUpdateSuccess(message) {
+    document.getElementById('updateSuccessMessage').textContent = message;
+    showModal("updateSuccessModal");
+    
+    // Setup redirect button
+    const redirectBtn = document.getElementById('redirectButton');
+    if (redirectBtn) {
+        redirectBtn.addEventListener('click', () => {
+            window.location.href = "/";
+        });
+    }
+}
+
+function showUpdateError(errorMessage) {
+    document.getElementById('updateErrorMessage').textContent = errorMessage;
+    showModal("updateErrorModal");
+}
+
+function countdownRedirect(seconds, targetUrl) {
+    let remaining = seconds;
+    const countdownEl = document.getElementById('countdown');
+    
+    const updateCountdown = () => {
+        if (countdownEl) {
+            countdownEl.textContent = remaining;
+        }
+        
+        if (remaining > 0) {
+            remaining--;
+            setTimeout(updateCountdown, 1000);
+        } else {
+            // Redirect when countdown reaches zero
+            window.location.href = targetUrl;
+        }
+    };
+    
+    updateCountdown();
 }

@@ -296,6 +296,15 @@ export function showModal(modalId, msg = "") {
     modal.show();
 }
 
+export function hideModal(modalId) {
+    const modalEl = document.getElementById(modalId);
+    if (!modalEl) return;
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) {
+        modal.hide();
+    }
+}
+
 export async function renderWifiNetworks() {
     const select = document.getElementById("ssid");
     select.innerHTML = "<option>Carregando...</option>";

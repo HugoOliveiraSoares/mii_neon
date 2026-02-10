@@ -295,7 +295,66 @@
         </div>
       </div>
     </div>
+    
+    <!-- Update Progress Modal -->
+    <div class="modal fade" id="updateProgressModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-info text-white">
+            <h5 class="modal-title">Atualizando Sistema</h5>
+          </div>
+          <div class="modal-body text-center">
+            <div class="spinner-border text-primary mb-3" role="status">
+              <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p id="updateProgressMessage">Enviando arquivo para o dispositivo...</p>
+            <small class="text-muted">Por favor, não desligue o dispositivo durante a atualização.</small>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" disabled>Aguarde...</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Update Success Modal -->
+    <div class="modal fade" id="updateSuccessModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title">Atualização Concluída!</h5>
+          </div>
+          <div class="modal-body">
+            <p>Atualização realizada com sucesso!</p>
+            <p id="updateSuccessMessage">O dispositivo está reiniciando...</p>
+            <p class="text-muted">Você será redirecionado automaticamente em <span id="countdown">5</span> segundos.</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-success" id="redirectButton">Voltar para página inicial</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Update Error Modal -->
+    <div class="modal fade" id="updateErrorModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title">Erro na Atualização</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p>Ocorreu um erro durante a atualização:</p>
+            <p id="updateErrorMessage" class="text-danger"></p>
+            <p>Por favor, tente novamente.</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </body>
-
 </html>

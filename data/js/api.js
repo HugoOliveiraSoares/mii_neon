@@ -76,15 +76,53 @@ export const Api = {
     fetchWifiStatus: () => fetch("/wifistatus").then((r) => r.json()),
 
     firmwareUpdate: (formData) =>
-        fetch("/update", {
-            method: "POST",
-            body: formData,
-        }).then((r) => r.json()),
+        new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            
+            xhr.addEventListener('load', () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        resolve(response);
+                    } catch (e) {
+                        resolve(xhr.responseText);
+                    }
+                } else {
+                    reject(new Error(`HTTP ${xhr.status}: ${xhr.statusText}`));
+                }
+            });
+            
+            xhr.addEventListener('error', () => {
+                reject(new Error('Erro de rede ao enviar arquivo'));
+            });
+            
+            xhr.open('POST', '/update');
+            xhr.send(formData);
+        }),
 
     fileSystemUpdate: (formData) =>
-        fetch("/fsupdate", {
-            method: "POST",
-            body: formData,
-        }).then((r) => r.json()),
+        new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            
+            xhr.addEventListener('load', () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        resolve(response);
+                    } catch (e) {
+                        resolve(xhr.responseText);
+                    }
+                } else {
+                    reject(new Error(`HTTP ${xhr.status}: ${xhr.statusText}`));
+                }
+            });
+            
+            xhr.addEventListener('error', () => {
+                reject(new Error('Erro de rede ao enviar arquivo'));
+            });
+            
+            xhr.open('POST', '/fsupdate');
+            xhr.send(formData);
+        }),
 
 };
