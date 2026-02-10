@@ -1,7 +1,10 @@
 #pragma once
 #include "../led_strip/LedStrip.h"
 #include "EffectsEnum.h"
+#include <ArduinoJson.h>
+#include <LittleFS.h>
 #include <cstdint>
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -12,6 +15,8 @@ private:
   EffectsEnum currentEffect;
   CRGB currentColor;
   int currentBright = 200;
+  std::map<int, CRGB> lastColorPerStrip;
+  bool hasIndividualColors = false;
 
   struct EffectState {
     bool isOn = true;
@@ -45,7 +50,11 @@ public:
   void showAllStrips();
 
   void setColor(CRGB color);
+  void setSripColor(std::map<int, CRGB> stripColors);
   CRGB getCurrentColor();
+  std::map<int, CRGB> getLastColorPerStrip();
+  void setHasIndividualColors(int hasIndividualColors);
+  bool isHasIndividualColors();
 
   int setBrightness(int bright);
   int getBrightness();
@@ -86,4 +95,8 @@ public:
   void snowSparkle(CRGB color, int sparkleDelay);
 
   void miiEffect();
+  void estaticEffect();
+
+  void saveConfig();
+  bool loadConfig();
 };

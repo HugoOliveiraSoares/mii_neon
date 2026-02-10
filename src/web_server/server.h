@@ -8,6 +8,7 @@
 #include <Ticker.h>
 #include <Update.h>
 #include <WiFi.h>
+#include <map>
 #include <vector>
 
 class WebServer {

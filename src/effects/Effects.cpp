@@ -20,11 +20,26 @@ void Effects::setColor(CRGB color) { this->currentColor = color; }
 
 CRGB Effects::getCurrentColor() { return this->currentColor; }
 
+void Effects::setHasIndividualColors(int hasIndividualColors) {
+  this->hasIndividualColors = hasIndividualColors;
+}
+bool Effects::isHasIndividualColors() { return this->hasIndividualColors; }
+
 // Basic LED control methods
 void Effects::setLedColor(const CRGB &color, int stripIndex, int pos) {
   if (stripIndex >= 0 && stripIndex < strips.size()) {
     strips[stripIndex]->setLedColor(color, pos);
   }
+}
+
+void Effects::setSripColor(std::map<int, CRGB> stripColors) {
+  for (auto strip : stripColors) {
+    this->lastColorPerStrip[strip.first] = strip.second;
+  }
+}
+
+std::map<int, CRGB> Effects::getLastColorPerStrip() {
+  return this->lastColorPerStrip;
 }
 
 void Effects::fillStrip(const CRGB &color, int stripIndex) {
@@ -319,6 +334,20 @@ void Effects::miiEffect() {
   }
 }
 
+void Effects::estaticEffect() {
+
+  Serial.print("hasIndividualColors: ");
+  Serial.println(hasIndividualColors);
+  if (this->hasIndividualColors) {
+
+    for (auto lastColor : this->lastColorPerStrip) {
+      this->fillStrip(lastColor.second, lastColor.first);
+    }
+  } else {
+    this->fillAllStrips(this->currentColor);
+  }
+}
+
 EffectsEnum Effects::getCurrentEffect() { return this->currentEffect; }
 
 int Effects::setCurrentEffect(String effectStr) {
@@ -343,4 +372,74 @@ int Effects::setCurrentEffect(String effectStr) {
   this->currentEffect = effect;
 
   return 0;
+}
+
+void Effects::saveConfig() {
+  DynamicJsonDocument doc(1024);
+  JsonObject ledConfig = doc.createNestedObject("led_config");
+
+  ledConfig["current_effect"] = toString(currentEffect);
+  ledConfig["has_individual_colors"] = hasIndividualColors;
+
+  JsonObject globalColor = ledConfig.createNestedObject("global_color");
+  globalColor["r"] = currentColor.r;
+  globalColor["g"] = currentColor.g;
+  globalColor["b"] = currentColor.b;
+
+  JsonArray stripColors = ledConfig.createNestedArray("last_color_per_strip");
+  for (auto const &[stripIndex, color] : lastColorPerStrip) {
+    JsonObject stripColor = stripColors.createNestedObject();
+    stripColor["strip_index"] = stripIndex;
+    JsonObject colorObj = stripColor.createNestedObject("color");
+    colorObj["r"] = color.r;
+    colorObj["g"] = color.g;
+    colorObj["b"] = color.b;
+  }
+
+  ledConfig["brightness"] = currentBright;
+
+  File f = LittleFS.open("/config.json", "w");
+  serializeJson(doc, f);
+  f.close();
+}
+
+bool Effects::loadConfig() {
+  if (!LittleFS.exists("/config.json"))
+    return false;
+
+  File f = LittleFS.open("/config.json", "r");
+  DynamicJsonDocument doc(1024);
+  DeserializationError err = deserializeJson(doc, f);
+  f.close();
+
+  if (err)
+    return false;
+
+  JsonObject ledConfig = doc["led_config"];
+
+  // Load hasIndividualColors
+  hasIndividualColors = ledConfig["has_individual_colors"] | false;
+
+  // Load global color
+  if (ledConfig.containsKey("global_color")) {
+    JsonObject globalColor = ledConfig["global_color"];
+    currentColor = CRGB(globalColor["r"], globalColor["g"], globalColor["b"]);
+  }
+
+  // Load lastColorPerStrip
+  if (ledConfig.containsKey("last_color_per_strip")) {
+    lastColorPerStrip.clear();
+    JsonArray stripColors = ledConfig["last_color_per_strip"];
+    for (JsonObject stripColor : stripColors) {
+      int stripIndex = stripColor["strip_index"];
+      JsonObject colorObj = stripColor["color"];
+      CRGB color = CRGB(colorObj["r"], colorObj["g"], colorObj["b"]);
+      lastColorPerStrip[stripIndex] = color;
+    }
+  }
+
+  // Load brightness
+  currentBright = ledConfig["brightness"] | 200;
+
+  return true;
 }

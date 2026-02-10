@@ -6,16 +6,30 @@ export const Api = {
             body: JSON.stringify(color),
         }).then((r) => r.json()),
 
+    setStripColor: (stripIndex, color) => {
+        const payload = {
+            has_individual_colors: true,
+            strips: [
+                {
+                    index: stripIndex,
+                    color: {
+                        r: color.red || color.r,
+                        g: color.green || color.g,
+                        b: color.blue || color.b,
+                    },
+                },
+            ],
+        };
+        return fetch("/color", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        }).then((r) => r.json());
+    },
+
     fetchColor: () =>
         fetch("/color")
             .then((r) => r.json())
-            .then((data) => {
-                if (data.rgb && typeof data.rgb.r !== "undefined") {
-                    return data.rgb;
-                } else {
-                    throw new Error("Formato de dados inválido" + JSON.stringify(data));
-                }
-            })
             .catch((error) => {
                 console.error("Erro ao buscar cor:", error);
                 return null;

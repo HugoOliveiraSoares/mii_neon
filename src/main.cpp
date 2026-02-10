@@ -98,11 +98,13 @@ void setup() {
   effects.addStrip<22>(8);
   effects.addStrip<23>(5);
   effects.addStrip<25>(5);
-  effects.addStrip<26>(7);
+  effects.addStrip<32>(7);
   effects.addStrip<27>(5);
   effects.initAllStrips();
 
   effects.showAllStrips();
+
+  effects.loadConfig();
 
   delay(100);
 }
@@ -114,10 +116,7 @@ void loop() {
     effects.miiEffect();
     break;
   case Estatico:
-    if (effects.getCurrentColor() == NULL) {
-      effects.setColor(CRGB(253, 96, 164));
-    }
-    effects.fillAllStrips(effects.getCurrentColor());
+    effects.estaticEffect();
     break;
   case Blink:
     if (effects.getCurrentColor() == NULL) {

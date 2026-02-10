@@ -3,11 +3,19 @@ import {
   setBrightToUi,
   setupColorPicker,
   setupEffectsList,
+  initializeCurrentEffect,
 } from "./ui.js";
 
 import { Api } from "./api.js";
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Set initial state - mode toggle initially hidden
+  const modeToggleContainer = document.querySelector('.form-check.form-switch');
+  if (modeToggleContainer) {
+    modeToggleContainer.style.display = 'none';
+    modeToggleContainer.style.opacity = '0';
+  }
+  
   // Inicializa UI
   adjustTabs();
   setupColorPicker();
@@ -30,4 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("Erro ao carregar dados: ", e);
     }
   })();
+
+  // Initialize current effect state
+  initializeCurrentEffect();
 });

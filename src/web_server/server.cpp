@@ -69,48 +69,89 @@ void WebServer::begin() {
       "/color", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
       [](AsyncWebServerRequest *request, uint8_t *data, size_t len,
          std::size_t index, std::size_t total) {
-        StaticJsonDocument<200> doc;
+        DynamicJsonDocument doc(2048);
         DeserializationError error = deserializeJson(doc, data, len);
 
         if (error) {
-          request->send(400, "text/plain", "Invalid JSON");
-          return;
-        }
-
-        if (!doc.containsKey("rgb")) {
+          Serial.print("Erro ao parsear JSON: ");
+          Serial.println(error.c_str());
           request->send(400, "application/json",
-                        "{\"error\":\"Missing rgb object\"}");
+                        "{\"error\":\"Invalid JSON\"}");
           return;
         }
 
-        int r = doc["rgb"]["r"];
-        int g = doc["rgb"]["g"];
-        int b = doc["rgb"]["b"];
+        bool hasIndividualColors = doc["has_individual_colors"];
 
-        effects.setColor(CRGB(r, g, b));
+        effects.setHasIndividualColors(hasIndividualColors);
+        if (hasIndividualColors) {
 
-        request->send(200, "application/json",
-                      "{\"response\":\"Color set successfully\"}");
+          JsonArray strips = doc["strips"];
+          std::map<int, CRGB> strip_colors;
+          for (JsonObject strip : strips) {
+            int index = strip["index"];
+            int r = strip["color"]["r"];
+            int g = strip["color"]["g"];
+            int b = strip["color"]["b"];
+            strip_colors.insert({index, CRGB(r, g, b)});
+          }
+
+          effects.setSripColor(strip_colors);
+
+          effects.saveConfig();
+
+          request->send(
+              200, "application/json",
+              "{\"response\":\"Individual strip colors set successfully\"}");
+
+        } else {
+          if (!doc.containsKey("color")) {
+            request->send(400, "application/json",
+                          "{\"error\":\"Missing color object\"}");
+            return;
+          }
+
+          int r = doc["color"]["r"];
+          int g = doc["color"]["g"];
+          int b = doc["color"]["b"];
+
+          effects.setColor(CRGB(r, g, b));
+          effects.saveConfig();
+
+          request->send(200, "application/json",
+                        "{\"response\":\"Color set successfully\"}");
+        }
       });
 
   server.on("/color", HTTP_GET, [](AsyncWebServerRequest *request) {
-    CRGB currentColor = effects.getCurrentColor();
-
-    Serial.print("Get current Color: ");
-    Serial.print("R: ");
-    Serial.print(currentColor.r);
-    Serial.print(", G: ");
-    Serial.print(currentColor.g);
-    Serial.print(", B: ");
-    Serial.println(currentColor.b);
-
-    DynamicJsonDocument doc(128);
-    JsonObject rgb = doc.createNestedObject("rgb");
-    rgb["r"] = currentColor.r;
-    rgb["g"] = currentColor.g;
-    rgb["b"] = currentColor.b;
+    StaticJsonDocument<2048> doc;
 
     String jsonString;
+    doc["has_individual_colors"] = effects.isHasIndividualColors();
+
+    if (effects.isHasIndividualColors()) {
+      std::map<int, CRGB> currentColors = effects.getLastColorPerStrip();
+      JsonArray strips = doc.createNestedArray("strips");
+
+      for (auto stripColor : currentColors) {
+
+        JsonObject stripObj = strips.createNestedObject();
+        stripObj["index"] = stripColor.first;
+
+        JsonObject color = stripObj.createNestedObject("color");
+        color["r"] = stripColor.second.r;
+        color["g"] = stripColor.second.g;
+        color["b"] = stripColor.second.b;
+      }
+
+    } else {
+      CRGB currentColor = effects.getCurrentColor();
+
+      JsonObject color = doc.createNestedObject("color");
+      color["r"] = currentColor.r;
+      color["g"] = currentColor.g;
+      color["b"] = currentColor.b;
+    }
+
     serializeJson(doc, jsonString);
 
     request->send(200, "application/json", jsonString);
