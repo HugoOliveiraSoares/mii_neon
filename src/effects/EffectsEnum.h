@@ -5,10 +5,9 @@ enum EffectsEnum {
   Mii,
   Estatico,
   Blink,
-  Pacifica,
   Cyclon,
   ColorWipe,
-  ColorWipeInverse,
+  ColorWipeReverse,
   SnowSparkle,
   Rainbow,
   // New Effects
@@ -23,14 +22,12 @@ inline const char *toString(EffectsEnum effect) {
     return "Estatico";
   case Blink:
     return "Blink";
-  case Pacifica:
-    return "Pacifica";
   case Cyclon:
     return "Cyclon";
   case ColorWipe:
     return "ColorWipe";
-  case ColorWipeInverse:
-    return "ColorWipeInverse";
+  case ColorWipeReverse:
+    return "ColorWipeReverse";
   case SnowSparkle:
     return "SnowSparkle";
   case Rainbow:
@@ -41,16 +38,18 @@ inline const char *toString(EffectsEnum effect) {
 }
 
 inline EffectsEnum fromString(const String &effectName) {
+  if (effectName == "Mii")
+    return Mii;
   if (effectName == "Estatico")
     return Estatico;
   if (effectName == "Blink")
     return Blink;
-  if (effectName == "Pacifica")
-    return Pacifica;
   if (effectName == "Cyclon")
     return Cyclon;
   if (effectName == "ColorWipe")
     return ColorWipe;
+  if (effectName == "ColorWipeReverse")
+    return ColorWipeReverse;
   if (effectName == "SnowSparkle")
     return SnowSparkle;
   if (effectName == "Rainbow")

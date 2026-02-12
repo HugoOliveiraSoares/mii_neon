@@ -1,279 +1,445 @@
 #include "Effects.h"
+#include "EffectErrorCodes.h"
+#include "EffectsEnum.h"
+#include <Arduino.h>
 
-Effects::Effects() {}
-
-void Effects::init() {
-
-  delay(1500);
-  FastLED.addLeds<WS2812B, 2, GRB>(leds, 0, NUM_TOTAL_LEDS)
-      .setCorrection(TypicalLEDStrip);
-  FastLED.setBrightness(255);
-  FastLED.clear();
+// Strip management methods
+void Effects::initAllStrips() {
+  for (auto &strip : strips) {
+    strip->init();
+  }
 }
 
-unsigned long Effects::getLastUpdate() { return this->lastUpdate; }
+void Effects::showAllStrips() {
+  for (auto &strip : strips) {
+    strip->show();
+  }
+}
+
+void Effects::setColor(CRGB color) { this->currentColor = color; }
+
+CRGB Effects::getCurrentColor() { return this->currentColor; }
+
+void Effects::setHasIndividualColors(int hasIndividualColors) {
+  this->hasIndividualColors = hasIndividualColors;
+}
+bool Effects::isHasIndividualColors() { return this->hasIndividualColors; }
+
+// Basic LED control methods
+void Effects::setLedColor(const CRGB &color, int stripIndex, int pos) {
+  if (stripIndex >= 0 && stripIndex < strips.size()) {
+    strips[stripIndex]->setLedColor(color, pos);
+  }
+}
+
+void Effects::setSripColor(std::map<int, CRGB> stripColors) {
+  for (auto strip : stripColors) {
+    this->lastColorPerStrip[strip.first] = strip.second;
+  }
+}
+
+std::map<int, CRGB> Effects::getLastColorPerStrip() {
+  return this->lastColorPerStrip;
+}
+
+void Effects::fillStrip(const CRGB &color, int stripIndex) {
+  if (stripIndex >= 0 && stripIndex < strips.size()) {
+    strips[stripIndex]->fill(color);
+  }
+}
+
+void Effects::fillAllStrips(const CRGB &color) {
+  for (auto &strip : strips) {
+    strip->fill(color);
+  }
+}
+
+int Effects::setBrightness(int bright) {
+  if (bright < BRIGHTNESS_MIN_VALUE || bright > BRIGHTNESS_MAX_VALUE) {
+    return BRIGHTNESS_OUT_OF_RANGE;
+  }
+
+  this->currentBright = bright;
+  for (auto &strip : strips) {
+    strip->setBrightness(bright);
+  }
+
+  return BRIGHTNESS_SUCCESS;
+}
+
+int Effects::getBrightness() { return this->currentBright; }
+
+unsigned long Effects::getLastUpdate() const { return this->lastUpdate; }
 
 void Effects::setLastUpdate(unsigned long newUpdate) {
   this->lastUpdate = newUpdate;
 }
 
-void Effects::setLedColor(CRGB color, int pos) {
-  this->leds[pos] = color;
-  FastLED.show();
-}
+int Effects::getStripCount() const { return strips.size(); }
 
-void Effects::fill(CRGB color) { this->fill(color, NUM_TOTAL_LEDS); }
-
-void Effects::fill(CRGB color, int length) {
-  for (int i = 0; i < length; i++) {
-    this->leds[i] = color;
+int Effects::getStripLedCount(int stripIndex) const {
+  if (stripIndex >= 0 && stripIndex < strips.size()) {
+    return strips[stripIndex]->getNumTotalLeds();
   }
-  FastLED.show();
+  return 0;
 }
 
-void Effects::fillSegment(CRGB color, Segment segment) {
-  int endPos = segment.start + segment.length;
-
-  // Garante que o segmento não ultrapasse os limites do array
-  if (segment.start < 0 || segment.start >= NUM_TOTAL_LEDS)
-    return;
-  if (endPos > NUM_TOTAL_LEDS)
-    endPos = NUM_TOTAL_LEDS;
-
-  for (int i = segment.start; i < endPos; i++) {
-    this->leds[i] = color;
-  }
-
-  FastLED.show();
-}
-
-void Effects::blink(CRGB color, CRGB color2, int time) {
-  static bool isOn;
-  if (millis() - this->lastUpdate > time) {
-    if (isOn) {
-      this->fill(color2, NUM_TOTAL_LEDS);
-      isOn = false;
+// Blink effects implementation
+void Effects::blink(const CRGB &color, const CRGB &color2, int time) {
+  if (millis() - lastUpdate > time) {
+    if (state.isOn) {
+      fillAllStrips(color2);
     } else {
-      this->fill(color, NUM_TOTAL_LEDS);
-      isOn = true;
+      fillAllStrips(color);
     }
-    this->lastUpdate = millis();
+    state.isOn = !state.isOn;
+    lastUpdate = millis();
+
+    // Synchronized show across all strips
+    showAllStrips();
   }
 }
 
-void Effects::blink(CRGB color) { this->blink(color, CRGB::Black, 1000); }
-void Effects::blink(CRGB color, CRGB color2) {
-  this->blink(color, color2, 1000);
+void Effects::blink(const CRGB &color) { blink(color, CRGB::Black, 1000); }
+
+void Effects::blink(const CRGB &color, const CRGB &color2) {
+  blink(color, color2, 1000);
 }
 
-void Effects::pacifica_loop() {
-  // Increment the four "color index start" counters, one for each wave layer.
-  // Each is incremented at a different speed, and the speeds vary over time.
-  static uint16_t sCIStart1, sCIStart2, sCIStart3, sCIStart4;
-  static uint32_t sLastms = 0;
-  uint32_t ms = GET_MILLIS();
-  uint32_t deltams = ms - sLastms;
-  sLastms = ms;
-  uint16_t speedfactor1 = beatsin16(3, 179, 269);
-  uint16_t speedfactor2 = beatsin16(4, 179, 269);
-  uint32_t deltams1 = (deltams * speedfactor1) / 256;
-  uint32_t deltams2 = (deltams * speedfactor2) / 256;
-  uint32_t deltams21 = (deltams1 + deltams2) / 2;
-  sCIStart1 += (deltams1 * beatsin88(1011, 10, 13));
-  sCIStart2 -= (deltams21 * beatsin88(777, 8, 11));
-  sCIStart3 -= (deltams1 * beatsin88(501, 5, 7));
-  sCIStart4 -= (deltams2 * beatsin88(257, 4, 6));
+// ColorWipe effects implementation
+void Effects::colorWipe(const CRGB &color, const CRGB &color2, int time,
+                        bool isReversed) {
+  if (millis() - lastUpdate >= time) {
+    lastUpdate = millis();
 
-  // Clear out the LED array to a dim background blue-green
-  fill_solid(leds, NUM_TOTAL_LEDS, CRGB(2, 6, 10));
+    for (auto &strip : strips) {
+      int maxLeds = strip->getNumTotalLeds();
+      if (state.currentLed < maxLeds) {
+        CRGB ledColor = state.isOn ? color : color2;
+        if (isReversed) {
+          strip->setLedColor(ledColor, maxLeds - 1 - state.currentLed);
+        } else {
+          strip->setLedColor(ledColor, state.currentLed);
+        }
+      }
+    }
 
-  // Render each of four layers, with different scales and speeds, that vary
-  // over time
-  this->pacifica_one_layer(this->pacifica_palette_1, sCIStart1,
-                           beatsin16(3, 11 * 256, 14 * 256),
-                           beatsin8(10, 70, 130), 0 - beat16(301));
-  this->pacifica_one_layer(this->pacifica_palette_2, sCIStart2,
-                           beatsin16(4, 6 * 256, 9 * 256), beatsin8(17, 40, 80),
-                           beat16(401));
-  this->pacifica_one_layer(this->pacifica_palette_3, sCIStart3, 6 * 256,
-                           beatsin8(9, 10, 38), 0 - beat16(503));
-  this->pacifica_one_layer(this->pacifica_palette_3, sCIStart4, 5 * 256,
-                           beatsin8(8, 10, 28), beat16(601));
+    state.currentLed++;
 
-  // Add brighter 'whitecaps' where the waves lines up more
-  this->pacifica_add_whitecaps();
+    // Check if all strips are complete
+    bool allStripsComplete = true;
+    for (auto &strip : strips) {
+      if (state.currentLed < strip->getNumTotalLeds()) {
+        allStripsComplete = false;
+        break;
+      }
+    }
 
-  // Deepen the blues and greens a bit
-  this->pacifica_deepen_colors();
-  FastLED.show();
-}
+    if (allStripsComplete) {
+      state.currentLed = 0;
+      state.isOn = !state.isOn;
+    }
 
-void Effects::pacifica_one_layer(CRGBPalette16 &p, uint16_t cistart,
-                                 uint16_t wavescale, uint8_t bri,
-                                 uint16_t ioff) {
-  uint16_t ci = cistart;
-  uint16_t waveangle = ioff;
-  uint16_t wavescale_half = (wavescale / 2) + 20;
-  for (uint16_t i = 0; i < NUM_TOTAL_LEDS; i++) {
-    waveangle += 250;
-    uint16_t s16 = sin16(waveangle) + 32768;
-    uint16_t cs = scale16(s16, wavescale_half) + wavescale_half;
-    ci += cs;
-    uint16_t sindex16 = sin16(ci) + 32768;
-    uint8_t sindex8 = scale16(sindex16, 240);
-    CRGB c = ColorFromPalette(p, sindex8, bri, LINEARBLEND);
-    this->leds[i] += c;
+    showAllStrips();
   }
 }
 
-void Effects::pacifica_add_whitecaps() {
-  uint8_t basethreshold = beatsin8(9, 55, 65);
-  uint8_t wave = beat8(7);
+void Effects::colorWipe(const CRGB &color, int time) {
+  colorWipe(color, CRGB::Black, time, false);
+}
 
-  for (uint16_t i = 0; i < NUM_TOTAL_LEDS; i++) {
-    uint8_t threshold = scale8(sin8(wave), 20) + basethreshold;
-    wave += 7;
-    uint8_t l = this->leds[i].getAverageLight();
-    if (l > threshold) {
-      uint8_t overage = l - threshold;
-      uint8_t overage2 = qadd8(overage, overage);
-      this->leds[i] += CRGB(overage, overage2, qadd8(overage2, overage2));
+void Effects::colorWipe(const CRGB &color) {
+  colorWipe(color, CRGB::Black, 50, false);
+}
+
+void Effects::colorWipeReverse(const CRGB &color) {
+  colorWipe(color, CRGB::Black, 50, true);
+}
+
+// Cyclon helper methods
+void Effects::cyclonUpdatePosition() {
+  if (cyclonState.direction) {
+    cyclonState.currentLed++;
+
+    // Check if reached max (use 100 as normalized max for scaling)
+    if (cyclonState.currentLed >= 100) {
+      cyclonState.currentLed = 100;
+      cyclonState.direction = false;
+    }
+  } else {
+    cyclonState.currentLed--;
+
+    if (cyclonState.currentLed < 0) {
+      cyclonState.currentLed = 0;
+      cyclonState.direction = true;
     }
   }
 }
 
-// Deepen the blues and greens
-void Effects::pacifica_deepen_colors() {
-  for (uint16_t i = 0; i < NUM_TOTAL_LEDS; i++) {
-    this->leds[i].blue = scale8(leds[i].blue, 145);
-    this->leds[i].green = scale8(leds[i].green, 200);
-    this->leds[i] |= CRGB(2, 5, 7);
+void Effects::fadeAllGlobal() {
+  for (auto &strip : strips) {
+    int numLeds = strip->getNumTotalLeds();
+    CRGB *stripLeds = strip->getLeds();
+
+    for (int i = 0; i < numLeds; i++) {
+      stripLeds[i].nscale8(250);
+    }
   }
 }
 
+// Main cyclon effect implementation
 void Effects::cyclon() {
   unsigned long currentMillis = millis();
-  static int currentLed = 0;
-  static bool direction = true;
-  static int hue = 0;
 
-  // Verifica se o tempo desde a última atualização é maior ou igual ao
-  // intervalo desejado (10ms)
-  if (currentMillis - this->lastUpdate >= 10) {
-    this->lastUpdate = currentMillis; // Atualiza o tempo da última atualização
+  if (currentMillis - lastUpdate >= CyclonState::UPDATE_INTERVAL) {
+    lastUpdate = currentMillis;
 
-    if (direction) {
-      // Movimento da esquerda para a direita
-      leds[currentLed] = CHSV(hue++, 255, 255); // Define a cor do LED atual
-      FastLED.show();                           // Atualiza os LEDs
-      fadeall(); // Escurece todos os LEDs gradualmente
+    // Process all strips
+    for (size_t stripIndex = 0; stripIndex < strips.size(); stripIndex++) {
+      int numLeds = strips[stripIndex]->getNumTotalLeds();
+      CRGB *stripLeds = strips[stripIndex]->getLeds();
 
-      currentLed++; // Avança para o próximo LED
+      // Calculate scaled position for this strip's length
+      int scaledPosition = map(cyclonState.currentLed, 0, 100, 0, numLeds - 1);
 
-      // Se chegou ao final, inverte a direção
-      if (currentLed >= NUM_TOTAL_LEDS) {
-        currentLed = NUM_TOTAL_LEDS - 1;
-        direction = false; // Inverte a direção
-      }
-    } else {
-      // Movimento da direita para a esquerda
-      leds[currentLed] = CHSV(hue++, 255, 255); // Define a cor do LED atual
-      FastLED.show();                           // Atualiza os LEDs
-      fadeall(); // Escurece todos os LEDs gradualmente
-
-      currentLed--; // Retrocede para o LED anterior
-
-      // Se chegou ao início, inverte a direção
-      if (currentLed < 0) {
-        currentLed = 0;
-        direction = true; // Inverte a direção
-      }
+      // Set current LED with shared HSV color
+      stripLeds[scaledPosition] = CHSV(cyclonState.hue++, 255, 255);
     }
+
+    // Apply global fade to all strips
+    fadeAllGlobal();
+
+    // Update shared movement state
+    cyclonUpdatePosition();
+
+    // Synchronized show across all strips
+    showAllStrips();
   }
 }
 
-void Effects::fadeall() {
-  for (int i = 0; i < NUM_TOTAL_LEDS; i++) {
-    leds[i].nscale8(250);
-  }
-}
+/*
+ *
+ * RainbowCycle Effect
+ *
+ */
 
-void Effects::colorWipe(CRGB color) { this->colorWipe(color, CRGB::Black, 50); }
-
-void Effects::colorWipe(CRGB color, int time) {
-  this->colorWipe(color, CRGB::Black, time);
-}
-
-void Effects::colorWipe(CRGB color, CRGB color2, int time) {
-  static bool isColor1 = false;
-  unsigned long currentMillis = millis();
-
-  if (currentMillis - this->lastUpdate >= time) {
-    this->lastUpdate = currentMillis;
-    if (isColor1) {
-      this->setLedColor(color, currentLed);
-    } else {
-      this->setLedColor(color2, currentLed);
-    }
-    currentLed++;
-    if (currentLed >= NUM_TOTAL_LEDS) {
-      currentLed = 0;
-      isColor1 = !isColor1;
-    }
-  }
-}
-
-void Effects::snowSparkle(CRGB color) {
-  this->snowSparkle(color, 15, random(100, 1000));
-}
-
-void Effects::snowSparkle(CRGB color, int sparkleDelay, int speedDelay) {
-  this->fill(color, NUM_TOTAL_LEDS);
-
-  int Pixel = random(NUM_TOTAL_LEDS);
-  this->leds[Pixel] = CRGB::Black;
-  FastLED.show();
-  delay(sparkleDelay);
-  this->leds[Pixel] = color;
-  FastLED.show();
-  delay(speedDelay);
-}
-
-void Effects::rainbowCycle() { this->rainbowCycle(20); }
-
-void Effects::rainbowCycle(int speedDelay) {
-  uint8_t *c;
-  uint16_t j;
-
-  if (millis() - this->lastUpdate > 20) {
-    for (int i = 0; i < NUM_TOTAL_LEDS; i++) {
-      c = this->wheel(((i * 256 / NUM_TOTAL_LEDS) + j) & 255);
-      this->leds[i] = CRGB(*c, *(c + 1), *(c + 2));
-    }
-    FastLED.show();
-    j++;
-    this->lastUpdate = millis();
-  }
-}
-
-uint8_t *Effects::wheel(uint8_t wheelPos) {
-  static uint8_t c[3];
-
+// RainbowCycle helper function - preserve exact wheel algorithm
+static CRGB wheel(uint8_t wheelPos) {
   if (wheelPos < 85) {
-    c[0] = wheelPos * 3;
-    c[1] = 255 - wheelPos * 3;
-    c[2] = 0;
+    return CRGB(wheelPos * 3, 255 - wheelPos * 3, 0);
   } else if (wheelPos < 170) {
     wheelPos -= 85;
-    c[0] = 255 - wheelPos * 3;
-    c[1] = 0;
-    c[2] = wheelPos * 3;
+    return CRGB(255 - wheelPos * 3, 0, wheelPos * 3);
   } else {
     wheelPos -= 170;
-    c[0] = 0;
-    c[1] = wheelPos * 3;
-    c[2] = 255 - wheelPos * 3;
+    return CRGB(0, wheelPos * 3, 255 - wheelPos * 3);
+  }
+}
+
+void Effects::rainbowCycle(int speedDelay) {
+
+  if (millis() - rainbowState.lastUpdate > speedDelay) {
+    for (size_t stripIndex = 0; stripIndex < strips.size(); stripIndex++) {
+      int numLeds = strips[stripIndex]->getNumTotalLeds();
+      CRGB *stripLeds = strips[stripIndex]->getLeds();
+
+      for (int i = 0; i < numLeds; i++) {
+        uint8_t wheelPos =
+            ((i * 256 / numLeds) + rainbowState.phaseOffset) & 255;
+        stripLeds[i] = wheel(wheelPos);
+      }
+    }
+
+    showAllStrips();
+    rainbowState.phaseOffset++;
+    rainbowState.lastUpdate = millis();
+  }
+}
+
+void Effects::rainbowCycle() { rainbowCycle(20); }
+
+/*
+ *
+ * SnowSparkle Effect
+ *
+ */
+
+void Effects::snowSparkle(CRGB color) { this->snowSparkle(color, 15); }
+
+void Effects::snowSparkle(CRGB color, int sparkleDelay) {
+  this->fillAllStrips(color);
+
+  int strip1 = random(0, strips.size());
+  int strip2 = random(0, strips.size());
+
+  int Pixel1 = random(strips[strip1]->getNumTotalLeds());
+  int Pixel2 = random(strips[strip2]->getNumTotalLeds());
+
+  this->setLedColor(CRGB::Black, strip1, Pixel1);
+  this->setLedColor(CRGB::Black, strip2, Pixel2);
+  this->showAllStrips();
+
+  delay(sparkleDelay);
+
+  this->setLedColor(color, strip1, Pixel1);
+  this->setLedColor(color, strip2, Pixel2);
+  this->showAllStrips();
+
+  delay(random(100, 1000));
+}
+
+/*
+ *
+ * Mii Effect - Different colors for different strips
+ *
+ */
+
+void Effects::miiEffect() {
+  // Define colors for Mii effect
+  const CRGB COLOR_PINK = CRGB(255, 0, 255);
+  const CRGB COLOR_CYAN = CRGB(0, 0, 255);
+  const CRGB COLOR_GRAY = CRGB::White;
+
+  // Strip 0 (Pin 13) -> COLOR_PINK
+  // Strip 1 (Pin 14) -> COLOR_PINK
+  // Strip 2 (Pin 16) -> COLOR_PINK
+  // Strip 3 (Pin 17) -> COLOR_CYAN
+  // Strip 4 (Pin 18) -> COLOR_CYAN
+  // Strip 5 (Pin 19) -> COLOR_GRAY
+  // Strip 6 (Pin 21) -> COLOR_PINK
+  // Strip 7 (Pin 22) -> COLOR_GRAY
+  // Strip 8 (Pin 23) -> COLOR_GRAY
+  // Strip 9 (Pin 25) -> COLOR_GRAY
+  // Strip 10 (Pin 26) -> COLOR_PINK
+  // Strip 11 (Pin 27) -> COLOR_GRAY
+
+  CRGB stripColors[] = {
+      COLOR_PINK, // Pin 13
+      COLOR_PINK, // Pin 14
+      COLOR_PINK, // Pin 16
+      COLOR_CYAN, // Pin 17
+      COLOR_CYAN, // Pin 18
+      COLOR_GRAY, // Pin 19
+      COLOR_PINK, // Pin 21
+      COLOR_GRAY, // Pin 22
+      COLOR_GRAY, // Pin 23
+      COLOR_GRAY, // Pin 25
+      COLOR_PINK, // Pin 26
+      COLOR_GRAY  // Pin 27
+  };
+
+  // Apply colors to each strip
+  for (size_t i = 0; i < strips.size() && i < 12; i++) {
+    fillStrip(stripColors[i], i);
+  }
+}
+
+void Effects::estaticEffect() {
+
+  Serial.print("hasIndividualColors: ");
+  Serial.println(hasIndividualColors);
+  if (this->hasIndividualColors) {
+
+    for (auto lastColor : this->lastColorPerStrip) {
+      this->fillStrip(lastColor.second, lastColor.first);
+    }
+  } else {
+    this->fillAllStrips(this->currentColor);
+  }
+}
+
+EffectsEnum Effects::getCurrentEffect() { return this->currentEffect; }
+
+int Effects::setCurrentEffect(String effectStr) {
+
+  EffectsEnum effect = fromString(effectStr);
+
+  if (effect == static_cast<EffectsEnum>(EFFECT_INVALID_NAME)) {
+#ifdef DEV_ENV
+    Serial.println("[ERROR] " + String(ERROR_INVALID_NAME_STR) + ": " +
+                   effectStr);
+    Serial.println("[INFO] Available effects:");
+    for (int i = 0; i < EFFECTS_COUNT; i++) {
+      EffectsEnum effect = static_cast<EffectsEnum>(i);
+      Serial.println("  - " + String(toString(effect)));
+    }
+#endif
+
+    // Return error code instead of throwing exception to avoid ESP8266 crashes
+    return EFFECT_INVALID_NAME;
   }
 
-  return c;
+  this->currentEffect = effect;
+
+  return 0;
+}
+
+void Effects::saveConfig() {
+  DynamicJsonDocument doc(1024);
+  JsonObject ledConfig = doc.createNestedObject("led_config");
+
+  ledConfig["current_effect"] = toString(currentEffect);
+  ledConfig["has_individual_colors"] = hasIndividualColors;
+
+  JsonObject globalColor = ledConfig.createNestedObject("global_color");
+  globalColor["r"] = currentColor.r;
+  globalColor["g"] = currentColor.g;
+  globalColor["b"] = currentColor.b;
+
+  JsonArray stripColors = ledConfig.createNestedArray("last_color_per_strip");
+  for (auto const &[stripIndex, color] : lastColorPerStrip) {
+    JsonObject stripColor = stripColors.createNestedObject();
+    stripColor["strip_index"] = stripIndex;
+    JsonObject colorObj = stripColor.createNestedObject("color");
+    colorObj["r"] = color.r;
+    colorObj["g"] = color.g;
+    colorObj["b"] = color.b;
+  }
+
+  ledConfig["brightness"] = currentBright;
+
+  File f = LittleFS.open("/config.json", "w");
+  serializeJson(doc, f);
+  f.close();
+}
+
+bool Effects::loadConfig() {
+  if (!LittleFS.exists("/config.json"))
+    return false;
+
+  File f = LittleFS.open("/config.json", "r");
+  DynamicJsonDocument doc(1024);
+  DeserializationError err = deserializeJson(doc, f);
+  f.close();
+
+  if (err)
+    return false;
+
+  JsonObject ledConfig = doc["led_config"];
+
+  // Load hasIndividualColors
+  hasIndividualColors = ledConfig["has_individual_colors"] | false;
+
+  // Load global color
+  if (ledConfig.containsKey("global_color")) {
+    JsonObject globalColor = ledConfig["global_color"];
+    currentColor = CRGB(globalColor["r"], globalColor["g"], globalColor["b"]);
+  }
+
+  // Load lastColorPerStrip
+  if (ledConfig.containsKey("last_color_per_strip")) {
+    lastColorPerStrip.clear();
+    JsonArray stripColors = ledConfig["last_color_per_strip"];
+    for (JsonObject stripColor : stripColors) {
+      int stripIndex = stripColor["strip_index"];
+      JsonObject colorObj = stripColor["color"];
+      CRGB color = CRGB(colorObj["r"], colorObj["g"], colorObj["b"]);
+      lastColorPerStrip[stripIndex] = color;
+    }
+  }
+
+  // Load brightness
+  currentBright = ledConfig["brightness"] | 200;
+
+  return true;
 }

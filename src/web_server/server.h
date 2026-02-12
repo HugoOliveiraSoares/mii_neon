@@ -1,10 +1,14 @@
 #pragma once
 
-#include "../led_service/LedService.h"
+#include "../effects/Effects.h"
 #include <ArduinoJson.h>
+#include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
 #include <Ticker.h>
+#include <Update.h>
+#include <WiFi.h>
+#include <map>
 #include <vector>
 
 class WebServer {
