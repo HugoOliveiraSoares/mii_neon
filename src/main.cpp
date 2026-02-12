@@ -7,7 +7,7 @@
 #include <WiFi.h>
 
 #define WIFI_CONFIG_FILE "/wifi.json"
-#define AP_SSID ""
+#define AP_SSID "Mii-Neon"
 #define AP_PASS ""
 
 WebServer webServer;
